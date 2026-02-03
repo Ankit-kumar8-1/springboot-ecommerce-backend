@@ -34,10 +34,10 @@ public class UserEntity {
     private Role role = Role.ROLE_CUSTOMER;
 
     @OneToMany
-    private Set<AddressEntity> addresses = new HashSet<>();
+    private Set<Address> addresses = new HashSet<>();
 
     @ManyToMany
     @JsonIgnore
-    private Set<CouponEntity> usedCoupons =  new HashSet<>();
+    private Set<Coupon> usedCoupons =  new HashSet<>();
 
 }
