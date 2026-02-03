@@ -1,0 +1,67 @@
+### Maven / Gradle ###
+target/
+build/
+.gradle/
+!/.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### IDEs ###
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse / STS
+.classpath
+.project
+.settings/
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache/
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+
+### User Uploaded Media (DO NOT COMMIT) ###
+uploads/
+uploads/**
+
+
+### Logs ###
+logs/
+*.log
+
+### OS Files ###
+.DS_Store
+Thumbs.db
+
+### Environment / Secrets ###
+.env
+
+# Spring Boot config (DO NOT COMMIT)
+application.properties
+application.yml
+application-*.properties
+application-*.yml
+
+### Database ###
+*.db
+*.sqlite
+*.mv.db
+
+### Test / Coverage ###
+/out/
+coverage/
