@@ -16,6 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
+@Table(name = "orders")
 public class Order {
 
     @Id
@@ -47,8 +48,6 @@ public class Order {
     private OrderStatus orderStatus;
 
     private int totalItem;
-
-    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     private LocalDateTime orderDate = LocalDateTime.now();
     private LocalDateTime deliverDate = orderDate.plusDays(7);

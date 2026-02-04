@@ -2,9 +2,10 @@ package com.ankitsaahariya.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
 public class Review {
 
     @Id
@@ -32,11 +32,9 @@ public class Review {
 
     @JsonIgnore
     @ManyToOne
-    @Column(nullable = false)
     private Product product;
 
     @ManyToOne
-    @Column(nullable = false)
     private UserEntity user;
 
 

@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @Setter
 @Getter
-@EqualsAndHashCode
 public class Product {
 
     @Id
