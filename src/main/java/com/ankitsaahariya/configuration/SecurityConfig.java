@@ -59,7 +59,6 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler)
-
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
@@ -70,6 +69,7 @@ public class SecurityConfig {
     public RestTemplate restTemplate(){
         return new RestTemplate();
     }
+
 }
 
 
