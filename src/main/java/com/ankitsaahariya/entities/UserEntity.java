@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -25,13 +27,22 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
+    private boolean enabled = true;
+
     private String email;
 
     private String fullName;
 
     private String mobilNumber;
 
+    @Enumerated(EnumType.STRING)
     private Role role = Role.ROLE_CUSTOMER;
+
+
+    private boolean emailVerified = false;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<EmailVerificationToken> verificationTokens  = new ArrayList<>();
 
     @OneToMany
     private Set<Address> addresses = new HashSet<>();
