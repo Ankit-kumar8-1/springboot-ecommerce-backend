@@ -6,12 +6,20 @@ import com.ankitsaahariya.Service.EmailService;
 import com.ankitsaahariya.dao.EmailVerificationTokenRepository;
 import com.ankitsaahariya.dao.UserRepository;
 import com.ankitsaahariya.domain.Role;
+import com.ankitsaahariya.dto.request.LoginRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
+import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.entities.EmailVerificationToken;
 import com.ankitsaahariya.entities.UserEntity;
 import com.ankitsaahariya.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +37,7 @@ public class AuthServiceImp implements AuthService {
     private  final PasswordEncoder passwordEncoder;
     private final  JwtUtil jwtUtil;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     @Override
@@ -92,5 +101,27 @@ public class AuthServiceImp implements AuthService {
         return new MessageResponse("Email verified successfully. You can login now.");
     }
 
+    @Override
+    public LoginResponse login(LoginRequest request) {
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(new
+                    UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
+        }catch (BadCredentialsException ex){
+            throw new InvalidCredentialsException("Invalid Email or Password");
+        }
 
+        UserEntity user=  userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new UsernameNotFoundException("User not found with Email "+ request.getEmail()));
+
+        if(!user.isEmailVerified()){
+            throw  new EmailNotVerifiedException("Please verity your account , check your Email");
+        }
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String token  = jwtUtil.generateToken(request.getEmail(), request.getPassword());
+
+        return new LoginResponse(token,user.getEmail(),user.getFullName(),user.getRole());
+    }
 }

@@ -1,7 +1,9 @@
 package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.AuthService;
+import com.ankitsaahariya.dto.request.LoginRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
+import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,4 +27,8 @@ public class AuthController {
         return ResponseEntity.ok(authService.verifyEmail(token));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse>  login(@RequestBody LoginRequest loginRequest){
+        return  ResponseEntity.ok(authService.login(loginRequest));
+    }
 }

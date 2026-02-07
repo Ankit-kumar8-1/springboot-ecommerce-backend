@@ -62,6 +62,27 @@ public class GlobleExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND,ex.getMessage());
     }
 
+    @ExceptionHandler(AccountDisabledException.class)
+    public ResponseEntity<Map<String,Object>>  AccountDisabled(AccountDisabledException ex){
+        log.warn("AccountDisabledException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.FORBIDDEN,ex.getMessage());
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<Map<String,Object>> EmailNotVerified(EmailNotVerifiedException ex){
+        log.warn("EmailNotVerifiedException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.FORBIDDEN,ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String,Object> >UserNotFound(InvalidCredentialsException ex){
+        log.warn("InvalidCredentialsException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.UNAUTHORIZED,ex.getMessage());
+    }
+
+
+
+
 
 
 }
