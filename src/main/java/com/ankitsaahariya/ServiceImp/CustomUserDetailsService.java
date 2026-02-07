@@ -1,9 +1,10 @@
 package com.ankitsaahariya.ServiceImp;
 
+import com.ankitsaahariya.dao.SellerRepository;
 import com.ankitsaahariya.dao.UserRepository;
+import com.ankitsaahariya.entities.Seller;
 import com.ankitsaahariya.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,8 +17,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found: " + email));
@@ -28,5 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .authorities(user.getRole().name()) // ROLE_CUSTOMER etc
                 .disabled(!user.isEnabled())
                 .build();
+
+
     }
 }
+

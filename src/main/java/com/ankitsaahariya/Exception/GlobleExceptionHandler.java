@@ -20,8 +20,15 @@ public class GlobleExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT,ex.getMessage());
     }
 
-    private ResponseEntity<Map<String,Object>> buildResponse(HttpStatus status, String message){
-        Map<String,Object> body = Map.of("timestamp", Instant.now(),"error",message);
+    private ResponseEntity<Map<String, Object>> buildResponse(
+            HttpStatus status,
+            String message
+    ) {
+        Map<String, Object> body = Map.of(
+                "timestamp", Instant.now(),
+                "status", status.value(),
+                "error", message
+        );
         return ResponseEntity.status(status).body(body);
     }
 
@@ -30,4 +37,31 @@ public class GlobleExceptionHandler {
         log.warn("EmailNotVerifiedException: {}", ex.getMessage(),ex);
         return buildResponse(HttpStatus.CONFLICT,ex.getMessage());
     }
+
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<Map<String,Object>>InvalidVerificationToken(InvalidVerificationTokenException ex){
+        log.warn("InvalidVerificationTokenException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_FOUND,ex.getMessage());
+    }
+
+    @ExceptionHandler(UserAlreadyVerifiedException.class)
+    public ResponseEntity<Map<String,Object>>UserAlreadyVerified(UserAlreadyVerifiedException ex){
+        log.warn("UserAlreadyVerifiedException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NO_CONTENT,ex.getMessage());
+    }
+
+    @ExceptionHandler(VerificationTokenExpiredException.class)
+    public ResponseEntity<Map<String,Object>>VerificationTokenExpired(VerificationTokenExpiredException ex){
+        log.warn("VerificationTokenExpiredException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.GONE,ex.getMessage());
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String,Object>>UserNotFound(UserNotFoundException ex){
+        log.warn("UserNotFoundException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_FOUND,ex.getMessage());
+    }
+
+
+
 }

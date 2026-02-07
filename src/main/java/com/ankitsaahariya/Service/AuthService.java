@@ -8,4 +8,5 @@ public interface AuthService {
 
     MessageResponse signup(SignupRequest  request);
 
-    }
+    MessageResponse verifyEmail(String token);
+}

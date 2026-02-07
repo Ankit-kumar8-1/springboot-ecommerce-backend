@@ -5,10 +5,7 @@ import com.ankitsaahariya.dto.request.SignupRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -21,6 +18,11 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<MessageResponse> signup(@RequestBody  SignupRequest signupRequest){
         return ResponseEntity.ok(authService.signup(signupRequest));
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<MessageResponse> verifyEmail(@RequestParam String token){
+        return ResponseEntity.ok(authService.verifyEmail(token));
     }
 
 }

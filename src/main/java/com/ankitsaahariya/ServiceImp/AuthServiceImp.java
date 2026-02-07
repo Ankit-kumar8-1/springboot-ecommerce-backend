@@ -1,6 +1,6 @@
 package com.ankitsaahariya.ServiceImp;
 
-import com.ankitsaahariya.Exception.EmailAlreadyExistsException;
+import com.ankitsaahariya.Exception.*;
 import com.ankitsaahariya.Service.AuthService;
 import com.ankitsaahariya.Service.EmailService;
 import com.ankitsaahariya.dao.EmailVerificationTokenRepository;
@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -55,5 +56,41 @@ public class AuthServiceImp implements AuthService {
         emailService.sendVerificationEmail(request.getEmail(),token,request.getFullName());
         return new MessageResponse("Registration successful ! Please check your email to verify your account");
     }
+
+    @Override
+    @Transactional
+    public MessageResponse verifyEmail(String token) {
+
+        EmailVerificationToken verifyToken =
+                emailVerificationTokenRepository.findByToken(token)
+                        .orElseThrow(() ->
+                                new InvalidVerificationTokenException("Invalid verification token"));
+
+        if (verifyToken.isUsed()) {
+            throw new InvalidVerificationTokenException("Verification token already used");
+        }
+
+        if (verifyToken.getExpiryTime().isBefore(LocalDateTime.now())) {
+            throw new VerificationTokenExpiredException("Verification token expired");
+        }
+
+        UserEntity user = verifyToken.getUser();
+        if (user == null) {
+            throw new UserNotFoundException("User associated with token not found");
+        }
+
+        if (user.isEmailVerified()) {
+            throw new UserAlreadyVerifiedException("Email already verified");
+        }
+
+        user.setEmailVerified(true);
+        verifyToken.setUsed(true);
+
+        userRepository.save(user);
+        emailVerificationTokenRepository.save(verifyToken);
+
+        return new MessageResponse("Email verified successfully. You can login now.");
+    }
+
 
 }
