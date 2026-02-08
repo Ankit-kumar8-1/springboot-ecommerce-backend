@@ -7,6 +7,7 @@ import com.ankitsaahariya.dao.EmailVerificationTokenRepository;
 import com.ankitsaahariya.dao.UserRepository;
 import com.ankitsaahariya.domain.Role;
 import com.ankitsaahariya.dto.request.LoginRequest;
+import com.ankitsaahariya.dto.request.ResendVerificationRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -59,7 +61,7 @@ public class AuthServiceImp implements AuthService {
         EmailVerificationToken emailVerificationToken = new EmailVerificationToken();
         emailVerificationToken.setToken(token);
         emailVerificationToken.setUser(newUser);
-        emailVerificationToken.setExpiryTime(LocalDateTime.now().plusMinutes(15));
+        emailVerificationToken.setExpiryTime(LocalDateTime.now().plusSeconds(3));
         emailVerificationTokenRepository.save(emailVerificationToken);
 
         emailService.sendVerificationEmail(request.getEmail(),token,request.getFullName());
@@ -123,5 +125,32 @@ public class AuthServiceImp implements AuthService {
         String token  = jwtUtil.generateToken(request.getEmail(), request.getPassword());
 
         return new LoginResponse(token,user.getEmail(),user.getFullName(),user.getRole());
+    }
+
+    @Transactional
+    @Override
+    public MessageResponse resendVerificationLink(ResendVerificationRequest request) {
+
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new UserNotFoundException("User Not Found Please Signup First"));
+
+        if(user.isEmailVerified()){
+            throw new UserAlreadyVerifiedException("User Email  Already  verified , go to login pages");
+        }
+
+        EmailVerificationToken newToken = new EmailVerificationToken();
+        newToken.setToken(UUID.randomUUID().toString());
+        newToken.setExpiryTime(LocalDateTime.now().plusMinutes(15));
+        newToken.setUser(user);
+
+        emailVerificationTokenRepository.save(newToken);
+        emailService.sendVerificationEmail(
+                user.getEmail(),
+                newToken.getToken(),
+                user.getFullName()
+        );
+
+        return new MessageResponse(
+                "Please check your email, verification link has been sent");
     }
 }

@@ -2,6 +2,7 @@ package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.AuthService;
 import com.ankitsaahariya.dto.request.LoginRequest;
+import com.ankitsaahariya.dto.request.ResendVerificationRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
@@ -30,5 +31,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse>  login(@RequestBody LoginRequest loginRequest){
         return  ResponseEntity.ok(authService.login(loginRequest));
+    }
+
+    @PostMapping("/resend-verification")
+    public  ResponseEntity<MessageResponse> resendVerificationLink(@RequestBody ResendVerificationRequest request){
+        return ResponseEntity.ok(authService.resendVerificationLink(request));
     }
 }

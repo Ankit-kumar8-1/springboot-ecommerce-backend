@@ -27,7 +27,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
-    private static final String[] PUBLIC_ENDPOINTS={
+    public static final String[] PUBLIC_ENDPOINTS={
             "/auth/login",
             "/auth/verify-email",
             "/auth/signup",

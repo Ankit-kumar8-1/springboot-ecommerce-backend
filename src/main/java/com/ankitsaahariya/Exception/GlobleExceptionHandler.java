@@ -81,6 +81,16 @@ public class GlobleExceptionHandler {
     }
 
 
+    @ExceptionHandler(VerificationTokenStillValidException.class)
+    public ResponseEntity<Map<String,Object> >VerificationTokenStillValid(VerificationTokenStillValidException ex){
+        log.warn("VerificationTokenStillValidException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
+    }
+
+
+
+
+
 
 
 
