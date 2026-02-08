@@ -2,10 +2,11 @@ package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.AuthService;
 import com.ankitsaahariya.dto.request.LoginRequest;
-import com.ankitsaahariya.dto.request.ResendVerificationRequest;
+import com.ankitsaahariya.dto.request.EmailRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,13 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public  ResponseEntity<MessageResponse> resendVerificationLink(@RequestBody ResendVerificationRequest request){
+    public  ResponseEntity<MessageResponse> resendVerificationLink(@RequestBody EmailRequest request){
         return ResponseEntity.ok(authService.resendVerificationLink(request));
+    }
+
+
+    @PostMapping("/forgot-password-request")
+    public ResponseEntity<MessageResponse> forgotPasswordRequest(@Valid @RequestBody  EmailRequest request){
+        return ResponseEntity.ok(authService.forgotPasswordRequest(request));
     }
 }

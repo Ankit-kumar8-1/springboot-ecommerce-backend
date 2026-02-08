@@ -1,10 +1,11 @@
 package com.ankitsaahariya.Service;
 
 import com.ankitsaahariya.dto.request.LoginRequest;
-import com.ankitsaahariya.dto.request.ResendVerificationRequest;
+import com.ankitsaahariya.dto.request.EmailRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
+import jakarta.validation.Valid;
 
 
 public interface AuthService {
@@ -15,5 +16,8 @@ public interface AuthService {
 
     LoginResponse login(LoginRequest loginRequest);
 
-    MessageResponse resendVerificationLink(ResendVerificationRequest request);
+    MessageResponse resendVerificationLink(EmailRequest request);
+
+
+    MessageResponse forgotPasswordRequest( EmailRequest request);
 }

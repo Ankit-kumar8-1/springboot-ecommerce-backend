@@ -7,7 +7,7 @@ import com.ankitsaahariya.dao.EmailVerificationTokenRepository;
 import com.ankitsaahariya.dao.UserRepository;
 import com.ankitsaahariya.domain.Role;
 import com.ankitsaahariya.dto.request.LoginRequest;
-import com.ankitsaahariya.dto.request.ResendVerificationRequest;
+import com.ankitsaahariya.dto.request.EmailRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
@@ -25,9 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -129,7 +128,7 @@ public class AuthServiceImp implements AuthService {
 
     @Transactional
     @Override
-    public MessageResponse resendVerificationLink(ResendVerificationRequest request) {
+    public MessageResponse resendVerificationLink(EmailRequest request) {
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()-> new UserNotFoundException("User Not Found Please Signup First"));
@@ -152,5 +151,25 @@ public class AuthServiceImp implements AuthService {
 
         return new MessageResponse(
                 "Please check your email, verification link has been sent");
+    }
+
+    @Override
+    public MessageResponse forgotPasswordRequest(EmailRequest request) {
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new UserNotFoundException("Email is not found , please signup first"));
+
+        if(!user.isEmailVerified()){
+            throw new EmailNotVerifiedException("Please verified your Email first !");
+        }
+
+        String token = UUID.randomUUID().toString();
+        user.setPasswordRestToken(token);
+        user.setPasswordRestTokenExpire(Instant.now().plusSeconds(600));
+        user.setPasswordResetVerified(false);
+
+        userRepository.save(user);
+        emailService.sendForgotPasswordRequest(request.getEmail(),token,user.getFullName());
+
+        return new MessageResponse("Please check your Email for  forgot password request verification ");
     }
 }

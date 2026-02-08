@@ -1,5 +1,6 @@
 package com.ankitsaahariya.security;
 
+import com.ankitsaahariya.configuration.SecurityConfig;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,22 +21,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+
     private final JwtUtil jwtUtil;
 
-    private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/auth/login",
-            "/auth/signup",
-            "/auth/verify-email",
-            "/auth/resend-verification",
-            "/auth/forgot-password",
-            "/auth/reset-password"
-    );
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -42,32 +32,46 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+
         String authHeader = request.getHeader("Authorization");
+        String token = null;
+        String username = null;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            try {
+                username = jwtUtil.extractUsername(token);
+            } catch (Exception ex) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
-        String token = authHeader.substring(7);
+        if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null &&
+                jwtUtil.isTokenValid(token)) {
 
-        if (!jwtUtil.isTokenValid(token)) {
-            filterChain.doFilter(request, response);
-            return;
+            String role = jwtUtil.extractRole(token); // ROLE_ADMIN or ADMIN
+
+            String authority = role.startsWith("ROLE_")
+                    ? role
+                    : "ROLE_" + role;
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            List.of(new SimpleGrantedAuthority(authority))
+                    );
+
+
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
-        String username = jwtUtil.extractUsername(token);
-        String role = jwtUtil.extractRole(token);
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        List.of(new SimpleGrantedAuthority(role))
-                );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         filterChain.doFilter(request, response);
     }
 }
-

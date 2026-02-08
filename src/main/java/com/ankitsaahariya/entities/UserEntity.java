@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,15 @@ public class UserEntity {
     private String fullName;
 
     private String mobilNumber;
+
+    @Column
+    private String passwordRestToken;
+
+    @Column
+    private Instant passwordRestTokenExpire;
+
+    @Column(name = "password_reset_verified",nullable = false)
+    private Boolean passwordResetVerified =false;
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.ROLE_CUSTOMER;
