@@ -39,6 +39,12 @@ public class UserEntity {
     @Column
     private String passwordRestToken;
 
+    @Column(name = "change_Password_Otp")
+    private String otp;
+
+    @Column
+    private Instant otpExpire;
+
     @Column
     private Instant passwordRestTokenExpire;
 

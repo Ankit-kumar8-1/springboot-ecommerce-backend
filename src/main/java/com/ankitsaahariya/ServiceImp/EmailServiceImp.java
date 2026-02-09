@@ -76,7 +76,36 @@ public class EmailServiceImp implements EmailService {
                             "This link is valid for a limited time. Please do not share this link with anyone.\n\n" +
                             "If you did not request this, please ignore this email.\n\n" +
                             "Best Regards,\n" +
-                            "Team Stream_Verse";
+                            "Team E-Commerce Backend";
+
+            message.setText(emailBody);
+            javaMailSender.send(message);
+
+            logger.info("Password reset email sent to {}", toEmail);
+
+        }catch (Exception ex){
+            logger.error("Failed to send password reset email to {}: {}",toEmail,ex.getMessage(),ex);
+            throw new RuntimeException("Failed to send password reset email");
+        }
+    }
+
+    @Override
+    public void SendChangePasswordRequestWithOpt(String toEmail, String otp, String fullName) {
+        try{
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("E-Commerce | Change Account Password Request");
+
+            String emailBody =
+                    "Hi " + fullName + ",\n\n" +
+                            "We received a request to change the password for your E-Commerce Backend account.\n\n" +
+                            "Please use the following One-Time Password (OTP) to proceed with changing your password:\n\n" +
+                            otp + "\n\n" +
+                            "This OTP is valid for a limited time. Please do not share it with anyone.\n\n" +
+                            "If you did not request a password change, please ignore this email.\n\n" +
+                            "Best regards,\n" +
+                            "Team E-Commerce Backend";
 
             message.setText(emailBody);
             javaMailSender.send(message);

@@ -34,7 +34,9 @@ public class SecurityConfig {
             "/auth/resend-verification",
             "/auth/forgot-password-request",
             "/auth/verifyForgotPasswordRequest",
-            "/auth/change-forgot-password"
+            "/auth/change-forgot-password",
+            "/auth/change-password-request-usingOtp",
+            "/auth/change-password-usingOtp"
 
     };
 

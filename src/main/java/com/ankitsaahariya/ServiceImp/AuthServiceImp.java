@@ -6,10 +6,7 @@ import com.ankitsaahariya.Service.EmailService;
 import com.ankitsaahariya.dao.EmailVerificationTokenRepository;
 import com.ankitsaahariya.dao.UserRepository;
 import com.ankitsaahariya.domain.Role;
-import com.ankitsaahariya.dto.request.LoginRequest;
-import com.ankitsaahariya.dto.request.EmailRequest;
-import com.ankitsaahariya.dto.request.SignupRequest;
-import com.ankitsaahariya.dto.request.TokenWithNewPasswordRequest;
+import com.ankitsaahariya.dto.request.*;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.entities.EmailVerificationToken;
@@ -28,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -47,6 +45,7 @@ public class AuthServiceImp implements AuthService {
         if(userRepository.existsByEmail(request.getEmail())){
             throw  new EmailAlreadyExistsException("Email Already Exists !");
         }
+
 
         UserEntity newUser = new UserEntity();
         newUser.setEmail(request.getEmail());
@@ -182,7 +181,7 @@ public class AuthServiceImp implements AuthService {
     @Override
     public MessageResponse verifyForgotPasswordRequest(String token) {
         UserEntity user = userRepository.findByPasswordRestToken(token)
-                .orElseThrow(()-> new ResourceNotFountException("Invalid Token"));
+                .orElseThrow(()-> new ResourceNotFoundException("Invalid Token"));
 
         if(user.getPasswordResetVerified()){
             throw  new forgotPasswordRequestAlreadyAccepted("Forgot password request is Already Accepted , go to ResetPassword Api endpoint");
@@ -201,7 +200,7 @@ public class AuthServiceImp implements AuthService {
     @Override
     public MessageResponse changeForgotPassword(TokenWithNewPasswordRequest request) {
         UserEntity user = userRepository.findByPasswordRestToken(request.getToken())
-                .orElseThrow(()-> new ResourceNotFountException("Invalid Token"));
+                .orElseThrow(()-> new ResourceNotFoundException("Invalid Token"));
 
         if(!user.getPasswordResetVerified()){
             throw new PasswordResetNotVerified("please check your email , first verified your forgot password request");
@@ -219,5 +218,62 @@ public class AuthServiceImp implements AuthService {
         userRepository.save(user);
 
         return new MessageResponse("Password reset Successfully ");
+    }
+
+    @Override
+    public MessageResponse changePasswordRequestUsingOtp(EmailRequest request) {
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new UserNotFoundException("User Email not found "));
+
+        if(!user.isEmailVerified()){
+            throw new EmailNotVerifiedException("Please verified your account first , then you perform another action !");
+        }
+
+        if (user.getOtp() != null && user.getOtpExpire().isAfter(Instant.now())){
+            throw new VerificationTokenStillValidException("Otp still valid , Please check your Email ");
+        }
+
+        String otp = String.valueOf(100000 + new Random().nextInt(900000));
+        user.setOtp(otp);
+        user.setOtpExpire(Instant.now().plusSeconds(600));
+
+        userRepository.save(user);
+        emailService.SendChangePasswordRequestWithOpt(request.getEmail(),otp,user.getFullName());
+
+        return new MessageResponse("Check your Email , Otp send on your Email" + request.getEmail());
+    }
+
+    @Override
+    public MessageResponse changePasswordUsingOtp(ChangePasswordUsingOtpRequest request) {
+        UserEntity user  = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new UserNotFoundException("Sorry ! this Email is Invalid, Please Enter right Email"));
+
+        if(user.getOtp() == null){
+            throw new ResourceNotFoundException("Please First Send change Password Request , then change your password");
+        }
+
+
+        if (user.getOtpExpire().isBefore(Instant.now())){
+            throw new VerificationTokenExpiredException("Otp Expire Please , Please Resend change Password request!");
+        }
+
+        if(!user.getOtp().equals(request.getOtp())){
+            throw new WrongOtpException("Otp is Wrong,Please send right Otp");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setOtpExpire(null);
+        user.setOtp(null);
+        userRepository.save(user);
+
+        return new MessageResponse("Password Change Successfully ! , go And login with new password");
+    }
+
+    @Override
+    public LoginResponse getCurrentUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new UsernameNotFoundException("User not found Exception"));
+        return new LoginResponse(null,user.getEmail(),user.getFullName(),user.getRole());
+
     }
 }

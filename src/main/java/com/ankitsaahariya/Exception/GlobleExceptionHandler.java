@@ -4,10 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
@@ -93,8 +95,8 @@ public class GlobleExceptionHandler {
         return buildResponse(HttpStatus.NO_CONTENT,ex.getMessage());
     }
 
-    @ExceptionHandler(ResourceNotFountException.class)
-    public ResponseEntity<Map<String,Object> > ResourceNotFoundException(ResourceNotFountException ex){
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String,Object> > ResourceNotFoundException(ResourceNotFoundException ex){
         log.warn("ResourceNotFoundException: {}",ex.getMessage(),ex);
         return buildResponse(HttpStatus.NOT_FOUND,ex.getMessage());
     }
@@ -103,6 +105,32 @@ public class GlobleExceptionHandler {
     public ResponseEntity<Map<String,Object> > PasswordResetNotVerified(PasswordResetNotVerified ex){
         log.warn("PasswordResetNotVerified: {}",ex.getMessage(),ex);
         return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
+    }
+
+    @ExceptionHandler(WrongOtpException.class)
+    public ResponseEntity<Map<String,Object> > WrongOtp(WrongOtpException ex){
+        log.warn("WrongOtpException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleValidationException(
+            MethodArgumentNotValidException ex) {
+
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error ->
+                        errors.put(error.getField(), error.getDefaultMessage())
+                );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Validation Failed");
+        response.put("errors", errors);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 

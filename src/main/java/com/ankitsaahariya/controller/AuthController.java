@@ -1,15 +1,13 @@
 package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.AuthService;
-import com.ankitsaahariya.dto.request.LoginRequest;
-import com.ankitsaahariya.dto.request.EmailRequest;
-import com.ankitsaahariya.dto.request.SignupRequest;
-import com.ankitsaahariya.dto.request.TokenWithNewPasswordRequest;
+import com.ankitsaahariya.dto.request.*;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +19,7 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<MessageResponse> signup(@RequestBody  SignupRequest signupRequest){
+    public ResponseEntity<MessageResponse> signup( @RequestBody  SignupRequest signupRequest){
         return ResponseEntity.ok(authService.signup(signupRequest));
     }
 
@@ -31,12 +29,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse>  login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<LoginResponse>  login(@Valid @RequestBody LoginRequest loginRequest){
         return  ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PostMapping("/resend-verification")
-    public  ResponseEntity<MessageResponse> resendVerificationLink(@RequestBody EmailRequest request){
+    public  ResponseEntity<MessageResponse> resendVerificationLink(@Valid @RequestBody EmailRequest request){
         return ResponseEntity.ok(authService.resendVerificationLink(request));
     }
 
@@ -56,5 +54,22 @@ public class AuthController {
     public ResponseEntity<MessageResponse>  changeForgotPassword(@Valid @RequestBody TokenWithNewPasswordRequest request){
         return ResponseEntity.ok(authService.changeForgotPassword(request));
     }
+
+    @PostMapping("/change-password-request-usingOtp")
+    public ResponseEntity<MessageResponse> changePasswordRequestUsingOtp( @Valid @RequestBody EmailRequest request){
+        return ResponseEntity.ok(authService.changePasswordRequestUsingOtp(request));
+    }
+
+    @PostMapping("change-password-usingOtp")
+    public ResponseEntity<MessageResponse> changePasswordUsingOtp(@Valid @RequestBody ChangePasswordUsingOtpRequest request){
+        return ResponseEntity.ok(authService.changePasswordUsingOtp(request));
+    }
+
+    @GetMapping("/getCurrentUser")
+    public ResponseEntity<LoginResponse> getCurrentUser(Authentication authentication){
+        String email = authentication.getName();
+        return ResponseEntity.ok(authService.getCurrentUser(email));
+    }
+
 
 }
