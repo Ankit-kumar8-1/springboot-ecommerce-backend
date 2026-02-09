@@ -37,6 +37,7 @@ public class SecurityConfig {
             "/auth/forgotPasswordAllow",
             "/auth/reset-password",
             "/auth/forgot-password-request",
+            "/auth/verifyForgotPasswordRequest",
             "/api/product/*/reviews"
     };
 

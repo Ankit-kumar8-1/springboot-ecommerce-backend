@@ -154,12 +154,17 @@ public class AuthServiceImp implements AuthService {
     }
 
     @Override
-    public MessageResponse forgotPasswordRequest(EmailRequest request) {
+    public MessageResponse
+    forgotPasswordRequest(EmailRequest request) {
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()-> new UserNotFoundException("Email is not found , please signup first"));
 
         if(!user.isEmailVerified()){
             throw new EmailNotVerifiedException("Please verified your Email first !");
+        }
+
+        if(user.getPasswordRestToken()!= null && user.getPasswordRestTokenExpire().isAfter(Instant.now())){
+            throw new VerificationTokenStillValidException("Token is Already Valid ,Please check your Email!");
         }
 
         String token = UUID.randomUUID().toString();
@@ -171,5 +176,24 @@ public class AuthServiceImp implements AuthService {
         emailService.sendForgotPasswordRequest(request.getEmail(),token,user.getFullName());
 
         return new MessageResponse("Please check your Email for  forgot password request verification ");
+    }
+
+    @Override
+    public MessageResponse verifyForgotPasswordRequest(String token) {
+        UserEntity user = userRepository.findByPasswordRestToken(token)
+                .orElseThrow(()-> new ResourceNotFountException("Invalid Token"));
+
+        if(user.getPasswordResetVerified()){
+            throw  new forgotPasswordRequestAlreadyAccepted("Forgot password request is Already Accepted , go to ResetPassword Api endpoint");
+        }
+
+        if(user.getPasswordRestTokenExpire() == null || Instant.now().isAfter(user.getPasswordRestTokenExpire())){
+            throw new VerificationTokenExpiredException("Token Expire , Please Request again");
+        }
+
+        user.setPasswordResetVerified(true);
+        userRepository.save(user);
+
+        return new MessageResponse("Your forgot password request Accepted , you can change password now");
     }
 }

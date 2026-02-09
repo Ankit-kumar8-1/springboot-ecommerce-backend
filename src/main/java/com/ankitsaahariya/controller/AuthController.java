@@ -44,4 +44,11 @@ public class AuthController {
     public ResponseEntity<MessageResponse> forgotPasswordRequest(@Valid @RequestBody  EmailRequest request){
         return ResponseEntity.ok(authService.forgotPasswordRequest(request));
     }
+
+//    http://localhost:1111/api/v1.1/auth/verifyForgotPasswordRequest?token=6bcac1d4-4b5e-493b-8654-0a3503465aaa
+    @GetMapping("/verifyForgotPasswordRequest")
+    public ResponseEntity<MessageResponse> verifyForgotPasswordRequest(@RequestParam String token){
+        return ResponseEntity.ok(authService.verifyForgotPasswordRequest(token));
+    }
+
 }

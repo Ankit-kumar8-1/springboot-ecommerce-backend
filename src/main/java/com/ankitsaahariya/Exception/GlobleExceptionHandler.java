@@ -87,6 +87,19 @@ public class GlobleExceptionHandler {
         return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
     }
 
+    @ExceptionHandler(forgotPasswordRequestAlreadyAccepted.class)
+    public ResponseEntity<Map<String,Object> >  forgotPasswordRequestAlreadyAccepted(forgotPasswordRequestAlreadyAccepted ex){
+        log.warn("forgotPasswordRequestAlreadyAccepted: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NO_CONTENT,ex.getMessage());
+    }
+
+    @ExceptionHandler(ResourceNotFountException.class)
+
+    public ResponseEntity<Map<String,Object> > ResourceNotFoundException(ResourceNotFountException ex){
+        log.warn("ResourceNotFoundException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_FOUND,ex.getMessage());
+    }
+
 
 
 

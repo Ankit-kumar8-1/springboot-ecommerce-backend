@@ -20,4 +20,7 @@ public interface AuthService {
 
 
     MessageResponse forgotPasswordRequest( EmailRequest request);
+
+
+    MessageResponse verifyForgotPasswordRequest(String token);
 }
