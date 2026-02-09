@@ -31,14 +31,11 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/verify-email",
             "/auth/signup",
-            "/auth/validate-email",
             "/auth/resend-verification",
-            "/auth/forgot-password",
-            "/auth/forgotPasswordAllow",
-            "/auth/reset-password",
             "/auth/forgot-password-request",
             "/auth/verifyForgotPasswordRequest",
-            "/api/product/*/reviews"
+            "/auth/change-forgot-password"
+
     };
 
     @Bean

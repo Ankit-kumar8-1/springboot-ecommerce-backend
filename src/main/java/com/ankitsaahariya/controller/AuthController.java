@@ -4,6 +4,7 @@ import com.ankitsaahariya.Service.AuthService;
 import com.ankitsaahariya.dto.request.LoginRequest;
 import com.ankitsaahariya.dto.request.EmailRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
+import com.ankitsaahariya.dto.request.TokenWithNewPasswordRequest;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import jakarta.validation.Valid;
@@ -49,6 +50,11 @@ public class AuthController {
     @GetMapping("/verifyForgotPasswordRequest")
     public ResponseEntity<MessageResponse> verifyForgotPasswordRequest(@RequestParam String token){
         return ResponseEntity.ok(authService.verifyForgotPasswordRequest(token));
+    }
+
+    @PostMapping("/change-forgot-password")
+    public ResponseEntity<MessageResponse>  changeForgotPassword(@Valid @RequestBody TokenWithNewPasswordRequest request){
+        return ResponseEntity.ok(authService.changeForgotPassword(request));
     }
 
 }

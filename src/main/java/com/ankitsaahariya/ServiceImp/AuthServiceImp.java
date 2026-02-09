@@ -9,6 +9,7 @@ import com.ankitsaahariya.domain.Role;
 import com.ankitsaahariya.dto.request.LoginRequest;
 import com.ankitsaahariya.dto.request.EmailRequest;
 import com.ankitsaahariya.dto.request.SignupRequest;
+import com.ankitsaahariya.dto.request.TokenWithNewPasswordRequest;
 import com.ankitsaahariya.dto.response.LoginResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.entities.EmailVerificationToken;
@@ -195,5 +196,28 @@ public class AuthServiceImp implements AuthService {
         userRepository.save(user);
 
         return new MessageResponse("Your forgot password request Accepted , you can change password now");
+    }
+
+    @Override
+    public MessageResponse changeForgotPassword(TokenWithNewPasswordRequest request) {
+        UserEntity user = userRepository.findByPasswordRestToken(request.getToken())
+                .orElseThrow(()-> new ResourceNotFountException("Invalid Token"));
+
+        if(!user.getPasswordResetVerified()){
+            throw new PasswordResetNotVerified("please check your email , first verified your forgot password request");
+        }
+
+        if(user.getPasswordRestTokenExpire().isBefore(Instant.now())){
+            throw new VerificationTokenExpiredException("Token is Expired , Please again hit forgot password Request !");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPasswordRestToken(null);
+        user.setPasswordRestTokenExpire(null);
+        user.setPasswordResetVerified(false);
+
+        userRepository.save(user);
+
+        return new MessageResponse("Password reset Successfully ");
     }
 }

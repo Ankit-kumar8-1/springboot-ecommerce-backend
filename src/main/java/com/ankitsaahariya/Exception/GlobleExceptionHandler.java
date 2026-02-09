@@ -94,10 +94,15 @@ public class GlobleExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFountException.class)
-
     public ResponseEntity<Map<String,Object> > ResourceNotFoundException(ResourceNotFountException ex){
         log.warn("ResourceNotFoundException: {}",ex.getMessage(),ex);
         return buildResponse(HttpStatus.NOT_FOUND,ex.getMessage());
+    }
+
+    @ExceptionHandler(PasswordResetNotVerified.class)
+    public ResponseEntity<Map<String,Object> > PasswordResetNotVerified(PasswordResetNotVerified ex){
+        log.warn("PasswordResetNotVerified: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
     }
 
 
