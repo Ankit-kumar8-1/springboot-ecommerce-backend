@@ -52,6 +52,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 jwtUtil.isTokenValid(token)) {
 
             String role = jwtUtil.extractRole(token); // ROLE_ADMIN or ADMIN
+            // ✅ DEBUGGING - Yeh logs add karein
+            System.out.println("=========== JWT DEBUG ===========");
+            System.out.println("Username: " + username);
+            System.out.println("Extracted Role: " + role);
 
             String authority = role.startsWith("ROLE_")
                     ? role
@@ -70,6 +74,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            // ✅ Confirm authentication set hua ya nahi
+            System.out.println("Authorities in SecurityContext: " +
+                    SecurityContextHolder.getContext().getAuthentication().getAuthorities());
+            System.out.println("=================================");
         }
 
         filterChain.doFilter(request, response);

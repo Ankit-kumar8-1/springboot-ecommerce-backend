@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -36,7 +36,8 @@ public class SecurityConfig {
             "/auth/verifyForgotPasswordRequest",
             "/auth/change-forgot-password",
             "/auth/change-password-request-usingOtp",
-            "/auth/change-password-usingOtp"
+            "/auth/change-password-usingOtp",
+//            "/user/**" //  temporarily
 
     };
 
@@ -55,6 +56,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers("/user/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
