@@ -7,5 +7,4 @@ public enum AccountStatus {
     DEACTIVATED,          // Account user ya system ne deactivate kar diya hai, ab use nahi ho sakta
     BANNED,               // Account permanently ban ho chuka hai due to serious violations
     CLOSED                // Account permanently close ho gaya hai aur dobara activate nahi ho sakta
-
 }
