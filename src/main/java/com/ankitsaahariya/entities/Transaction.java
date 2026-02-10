@@ -21,7 +21,7 @@ public class Transaction {
     private  UserEntity customer;
 
     @OneToOne
-    private Seller seller;
+    private SellerProfile seller;
 
     private LocalDateTime date = LocalDateTime.now();
 

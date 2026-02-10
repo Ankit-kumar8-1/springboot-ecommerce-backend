@@ -3,7 +3,6 @@ package com.ankitsaahariya.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,7 @@ public class Product {
     private Category category;
 
     @ManyToOne
-    private Seller seller;
+    private SellerProfile seller;
 
     private LocalDateTime createdAt;
 

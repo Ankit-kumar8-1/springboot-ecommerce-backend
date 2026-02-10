@@ -1,8 +1,6 @@
 package com.ankitsaahariya.ServiceImp;
 
-import com.ankitsaahariya.dao.SellerRepository;
 import com.ankitsaahariya.dao.UserRepository;
-import com.ankitsaahariya.entities.Seller;
 import com.ankitsaahariya.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

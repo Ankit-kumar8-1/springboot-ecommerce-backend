@@ -23,7 +23,6 @@ public class VerificationCode {
     private UserEntity user;
 
     @OneToOne
-    private Seller seller;
-
+    private SellerProfile seller;
 
 }

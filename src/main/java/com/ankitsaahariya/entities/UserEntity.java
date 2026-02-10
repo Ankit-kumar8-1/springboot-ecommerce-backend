@@ -67,4 +67,7 @@ public class UserEntity {
     @JsonIgnore
     private Set<Coupon> usedCoupons =  new HashSet<>();
 
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SellerProfile sellerProfile;
 }

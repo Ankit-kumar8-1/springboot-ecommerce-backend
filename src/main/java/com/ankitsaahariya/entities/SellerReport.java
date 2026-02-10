@@ -14,7 +14,7 @@ public class SellerReport {
     private Long id;
 
     @OneToOne
-    private Seller seller;
+    private SellerProfile seller;
 
     private Long totalEarnings = 0L;
 
