@@ -3,6 +3,7 @@ package com.ankitsaahariya.dto.response;
 import com.ankitsaahariya.domain.Role;
 import com.ankitsaahariya.entities.Address;
 import com.ankitsaahariya.entities.Coupon;
+import com.ankitsaahariya.entities.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,4 +36,17 @@ public class UserResponse {
     private List<Address> addresses = new ArrayList<>();
 
     private Set<Coupon> couponSet = new HashSet<>();
+
+    public static UserResponse fromEntity(UserEntity user){
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .mobilNumber(user.getMobilNumber())
+                .fullName(user.getFullName())
+                .emailVerified(user.isEmailVerified())
+                .role(user.getRole())
+                .addresses(user.getAddresses().stream().toList())
+                .couponSet(user.getUsedCoupons())
+                .build();
+    }
 }

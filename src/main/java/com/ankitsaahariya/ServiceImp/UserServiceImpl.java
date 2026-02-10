@@ -2,11 +2,16 @@ package com.ankitsaahariya.ServiceImp;
 
 import com.ankitsaahariya.Exception.UserNotFoundException;
 import com.ankitsaahariya.Service.UserService;
+import com.ankitsaahariya.Util.PaginationUtil;
 import com.ankitsaahariya.dao.UserRepository;
+import com.ankitsaahariya.dto.response.PageResponse;
 import com.ankitsaahariya.dto.response.UserResponse;
 import com.ankitsaahariya.entities.UserEntity;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.support.PageableUtils;
 import org.springframework.stereotype.Service;
 
 
@@ -32,4 +37,20 @@ public class UserServiceImpl implements UserService {
                 .mobilNumber(user.getMobilNumber())
                 .build();
     }
+
+    @Override
+    public PageResponse<UserResponse> getAllUser(int page, int size, String search) {
+        Pageable pageable = PaginationUtil.createPageRequest(page,size,"id");
+        Page<UserEntity> userPage;
+
+        if(search != null && !search.trim().isEmpty()){
+            userPage = userRepository.searchUser(search.trim(),pageable);
+        }else {
+            userPage = userRepository.findAll(pageable);
+        }
+
+        return PaginationUtil.toPageResponse(userPage,UserResponse::fromEntity);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.UserService;
+import com.ankitsaahariya.dto.response.PageResponse;
 import com.ankitsaahariya.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping("/test")
-    public String testing(){
-        return "Hello ji";
+    @GetMapping("/getAllUser")
+    public ResponseEntity<PageResponse<UserResponse>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search
+    ){
+        return ResponseEntity.ok(userService.getAllUser(page,size,search));
     }
 }
