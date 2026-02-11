@@ -16,9 +16,10 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@AllArgsConstructor
 @NotNull
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "seller_profiles")
 public class SellerProfile {
 

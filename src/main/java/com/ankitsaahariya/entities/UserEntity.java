@@ -1,12 +1,14 @@
 package com.ankitsaahariya.entities;
 
 import com.ankitsaahariya.domain.Role;
+import com.ankitsaahariya.domain.SellerIntentStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +58,12 @@ public class UserEntity {
 
 
     private boolean emailVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SellerIntentStatus sellerIntentStatus = SellerIntentStatus.NOT_REQUESTED;
+
+    private LocalDateTime sellerIntentRequestedAt;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     private List<EmailVerificationToken> verificationTokens  = new ArrayList<>();

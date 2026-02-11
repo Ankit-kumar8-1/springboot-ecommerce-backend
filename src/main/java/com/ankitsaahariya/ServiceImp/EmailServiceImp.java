@@ -89,6 +89,7 @@ public class EmailServiceImp implements EmailService {
         }
     }
 
+
     @Override
     public void SendChangePasswordRequestWithOpt(String toEmail, String otp, String fullName) {
         try{
@@ -111,6 +112,42 @@ public class EmailServiceImp implements EmailService {
             javaMailSender.send(message);
 
             logger.info("Password reset email sent to {}", toEmail);
+
+        }catch (Exception ex){
+            logger.error("Failed to send password reset email to {}: {}",toEmail,ex.getMessage(),ex);
+            throw new RuntimeException("Failed to send password reset email");
+        }
+
+    }
+    //        Email for apply become seller , this Email is before filling form
+    @Override
+    public void sendSellerIntentVerificationEmail(String toEmail, String token, String fullName) {
+
+        try{
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("E-Commerce | Seller Intent Verification Email");
+
+            String resetLink = backendUrl
+                    + "/api/v1.1/seller/verify-Seller-Intent?token="
+                    + URLEncoder.encode(token, StandardCharsets.UTF_8);
+
+            String emailBody = "Hi " + fullName + ",\n\n" +
+                    "Thank you for applying to become a seller on our platform!\n\n" +
+                    "We're excited to have you join our seller community.\n\n" +
+                    "To proceed with your application, please verify your email address by clicking the link below:\n\n" +
+                    resetLink + "\n\n" +
+                    "⏰ IMPORTANT: This verification link will expire in 30 minutes.\n\n" +
+                    "If you didn't request to become a seller, please ignore this email.\n\n" +
+                    "Need help? Contact our support team at ecommerce@yourstore.com\n\n" +
+                    "Best regards,\n" +
+                    "Team E-Commerce Platform";
+
+            message.setText(emailBody);
+            javaMailSender.send(message);
+
+            logger.info("Verify seller intent email sent to {}", toEmail);
 
         }catch (Exception ex){
             logger.error("Failed to send password reset email to {}: {}",toEmail,ex.getMessage(),ex);

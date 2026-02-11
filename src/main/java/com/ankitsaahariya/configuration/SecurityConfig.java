@@ -37,7 +37,8 @@ public class SecurityConfig {
             "/auth/change-forgot-password",
             "/auth/change-password-request-usingOtp",
             "/auth/change-password-usingOtp",
-//            "/user/**" //  temporarily
+//            "/user/**" //  temporarily,
+            "/seller/verify-Seller-Intent"
 
     };
 

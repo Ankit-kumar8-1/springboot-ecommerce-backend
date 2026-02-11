@@ -113,6 +113,18 @@ public class GlobleExceptionHandler {
         return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
     }
 
+    @ExceptionHandler(SellerProfileAlreadyExistsException.class)
+    public ResponseEntity<Map<String,Object> > SellerProfileAlreadyExists(SellerProfileAlreadyExistsException ex){
+        log.warn("SellerProfileAlreadyExistsException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
+    }
+
+    @ExceptionHandler(GstNumberAlreadyUsed.class)
+    public ResponseEntity<Map<String,Object> > GstNumberAlreadyUsed(GstNumberAlreadyUsed ex){
+        log.warn("GstNumberAlreadyUsed: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationException(
             MethodArgumentNotValidException ex) {

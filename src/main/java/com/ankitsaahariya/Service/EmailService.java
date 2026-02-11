@@ -10,4 +10,6 @@ public interface EmailService {
     void sendForgotPasswordRequest(String toEmail,String token,String fullName);
 
     void SendChangePasswordRequestWithOpt(String toEmail,String otp , String fullName);
+
+    void sendSellerIntentVerificationEmail(String toEmail,String token,String fullName);
 }
