@@ -6,6 +6,7 @@ import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.PageResponse;
+import com.ankitsaahariya.dto.response.SellerApplicationDetailResponse;
 import com.ankitsaahariya.dto.response.SellerProfileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +43,17 @@ public class SellerController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-
         return ResponseEntity.ok(
                 sellerService.getSellerApplications(status, page, size)
+        );
+    }
+
+    @GetMapping("/{sellerProfileId}")
+    public ResponseEntity<SellerApplicationDetailResponse> getSellerApplicationDetail(
+            @PathVariable Long sellerProfileId) {
+
+        return ResponseEntity.ok(
+                sellerService.getSellerApplicationDetail(sellerProfileId)
         );
     }
 }

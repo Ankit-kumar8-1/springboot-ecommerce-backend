@@ -1,9 +1,6 @@
 package com.ankitsaahariya.ServiceImp;
 
-import com.ankitsaahariya.Exception.BadRequestException;
-import com.ankitsaahariya.Exception.EmailNotVerifiedException;
-import com.ankitsaahariya.Exception.UserNotFoundException;
-import com.ankitsaahariya.Exception.VerificationTokenExpiredException;
+import com.ankitsaahariya.Exception.*;
 import com.ankitsaahariya.Service.EmailService;
 import com.ankitsaahariya.Service.SellerService;
 import com.ankitsaahariya.Util.PaginationUtil;
@@ -16,6 +13,7 @@ import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.PageResponse;
+import com.ankitsaahariya.dto.response.SellerApplicationDetailResponse;
 import com.ankitsaahariya.dto.response.SellerProfileResponse;
 import com.ankitsaahariya.entities.SellerIntentToken;
 import com.ankitsaahariya.entities.SellerProfile;
@@ -223,6 +221,57 @@ public class SellerServiceImpl implements SellerService {
     }
 
 
+    public SellerApplicationDetailResponse getSellerApplicationDetail(Long sellerProfileId) {
+
+        SellerProfile profile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> new ResourceNotFoundException("Seller application not found"));
+
+        return mapToDetailResponse(profile);
+    }
+
+
+
+    private SellerApplicationDetailResponse mapToDetailResponse(SellerProfile profile) {
+
+        return SellerApplicationDetailResponse.builder()
+                .sellerProfileId(profile.getId())
+
+                // USER
+                .userId(profile.getUser().getId())
+                .fullName(profile.getUser().getFullName())
+                .email(profile.getUser().getEmail())
+
+                // BUSINESS
+                .businessName(profile.getBusinessName())
+                .businessType(profile.getBusinessType())
+                .businessAddress(profile.getBusinessAddress())
+                .businessCity(profile.getBusinessCity())
+                .businessState(profile.getBusinessState())
+                .businessPincode(profile.getBusinessPincode())
+                .businessPhone(profile.getBusinessPhone())
+                .businessEmail(profile.getBusinessEmail())
+                .businessDescription(profile.getBusinessDescription())
+
+                // LEGAL
+                .gstNumber(profile.getGstNumber())
+                .panNumber(profile.getPanNumber())
+                .aadharNumber(profile.getAadharNumber())
+
+                // BANK
+                .bankAccountNumber(profile.getBankAccountNumber())
+                .bankIfscCode(profile.getBankIfscCode())
+                .bankAccountHolderName(profile.getBankAccountHolderName())
+                .bankName(profile.getBankName())
+                .bankBranch(profile.getBankBranch())
+
+                // STATUS
+                .verificationStatus(profile.getVerificationStatus())
+                .appliedAt(profile.getAppliedAt())
+                .verifiedAt(profile.getVerifiedAt())
+                .adminRemarks(profile.getAdminRemarks())
+
+                .build();
+    }
     private UserEntity getCurrentUser() {
         return userRepository.findByEmail(
                 SecurityContextHolder.getContext().getAuthentication().getName()

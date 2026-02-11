@@ -4,6 +4,7 @@ import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.PageResponse;
+import com.ankitsaahariya.dto.response.SellerApplicationDetailResponse;
 import com.ankitsaahariya.dto.response.SellerProfileResponse;
 
 public interface SellerService {
@@ -19,4 +20,6 @@ public interface SellerService {
             int page,
             int size
     );
+
+    SellerApplicationDetailResponse getSellerApplicationDetail(Long sellerProfileId);
 }
