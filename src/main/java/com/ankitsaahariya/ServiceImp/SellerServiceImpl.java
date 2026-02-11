@@ -6,6 +6,7 @@ import com.ankitsaahariya.Exception.UserNotFoundException;
 import com.ankitsaahariya.Exception.VerificationTokenExpiredException;
 import com.ankitsaahariya.Service.EmailService;
 import com.ankitsaahariya.Service.SellerService;
+import com.ankitsaahariya.Util.PaginationUtil;
 import com.ankitsaahariya.dao.SellerIntentTokenRepository;
 import com.ankitsaahariya.dao.SellerProfileRepository;
 import com.ankitsaahariya.dao.UserRepository;
@@ -14,10 +15,14 @@ import com.ankitsaahariya.domain.SellerIntentTokenStatus;
 import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
+import com.ankitsaahariya.dto.response.PageResponse;
+import com.ankitsaahariya.dto.response.SellerProfileResponse;
 import com.ankitsaahariya.entities.SellerIntentToken;
 import com.ankitsaahariya.entities.SellerProfile;
 import com.ankitsaahariya.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -197,6 +202,26 @@ public class SellerServiceImpl implements SellerService {
         profile.setVerificationStatus(SellerVerificationStatus.PENDING);
         profile.setAppliedAt(LocalDateTime.now());
     }
+
+
+    @Override
+    public PageResponse<SellerProfileResponse> getSellerApplications(
+            SellerVerificationStatus status,
+            int page,
+            int size
+    ) {
+
+        Pageable pageable = PaginationUtil.createPageRequest(page, size, "appliedAt");
+
+        Page<SellerProfile> sellerPage =
+                sellerProfileRepository.findAllByVerificationStatus(status, pageable);
+
+        return PaginationUtil.toPageResponse(
+                sellerPage,
+                SellerProfileResponse::fromEntity
+        );
+    }
+
 
     private UserEntity getCurrentUser() {
         return userRepository.findByEmail(

@@ -1,8 +1,7 @@
 package com.ankitsaahariya.dto.response;
 
-import com.ankitsaahariya.domain.BusinessType;
 import com.ankitsaahariya.domain.SellerVerificationStatus;
-import lombok.AllArgsConstructor;
+import com.ankitsaahariya.entities.SellerProfile;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,34 +9,24 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class SellerProfileResponse {
 
-
     private Long id;
-    private Long userId;
-    private String userEmail;
-
-
+    private String businessName;
+    private String gstNumber;
     private SellerVerificationStatus verificationStatus;
-    private Boolean isActive;
     private LocalDateTime appliedAt;
 
+    public static SellerProfileResponse fromEntity(SellerProfile profile) {
 
-    private String businessName;
-    private BusinessType businessType;
-    private String businessAddress;
-    private String businessCity;
-    private String businessState;
-    private String businessPincode;
-    private String businessPhone;
-    private String businessEmail;
-    private String businessDescription;
+        SellerProfileResponse response = new SellerProfileResponse();
+        response.setId(profile.getId());
+        response.setBusinessName(profile.getBusinessName());
+        response.setGstNumber(profile.getGstNumber());
+        response.setVerificationStatus(profile.getVerificationStatus());
+        response.setAppliedAt(profile.getAppliedAt());
 
-
-    private String gstNumber;
-    private String panNumber;
-
+        return response;
+    }
 }
