@@ -26,5 +26,9 @@ public class SellerController {
         return ResponseEntity.ok(sellerService.verifySellerIntent(token));
     }
 
+    @PostMapping("/applyForSeller")
+    public ResponseEntity<MessageResponse> applyForSeller(@RequestBody SellerApplicationRequest request){
+        return ResponseEntity.ok(sellerService.applyForSeller(request));
+    }
 
 }

@@ -12,4 +12,5 @@ public interface SellerProfileRepository extends JpaRepository<SellerProfile,Lon
     Optional<SellerProfile> findByUserId(Long id);
 
     boolean existsByGstNumber(String gstNumber);
+
 }

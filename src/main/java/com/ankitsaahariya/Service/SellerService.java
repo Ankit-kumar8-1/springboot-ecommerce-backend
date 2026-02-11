@@ -8,4 +8,6 @@ public interface SellerService {
     MessageResponse requestSellerIntent(String email);
 
     MessageResponse verifySellerIntent(String token);
+
+    MessageResponse applyForSeller(SellerApplicationRequest request);
 }

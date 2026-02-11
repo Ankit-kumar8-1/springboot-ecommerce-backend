@@ -1,5 +1,6 @@
 package com.ankitsaahariya.Exception;
 
+import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -122,6 +123,12 @@ public class GlobleExceptionHandler {
     @ExceptionHandler(GstNumberAlreadyUsed.class)
     public ResponseEntity<Map<String,Object> > GstNumberAlreadyUsed(GstNumberAlreadyUsed ex){
         log.warn("GstNumberAlreadyUsed: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String,Object> > BadRequest(BadRequestException ex){
+        log.warn("BadRequestException: {}",ex.getMessage(),ex);
         return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
     }
 

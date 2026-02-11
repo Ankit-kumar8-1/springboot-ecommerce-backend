@@ -1,6 +1,9 @@
 package com.ankitsaahariya.ServiceImp;
 
-import com.ankitsaahariya.Exception.*;
+import com.ankitsaahariya.Exception.BadRequestException;
+import com.ankitsaahariya.Exception.EmailNotVerifiedException;
+import com.ankitsaahariya.Exception.UserNotFoundException;
+import com.ankitsaahariya.Exception.VerificationTokenExpiredException;
 import com.ankitsaahariya.Service.EmailService;
 import com.ankitsaahariya.Service.SellerService;
 import com.ankitsaahariya.dao.SellerIntentTokenRepository;
@@ -11,22 +14,16 @@ import com.ankitsaahariya.domain.SellerIntentTokenStatus;
 import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
-import com.ankitsaahariya.dto.response.SellerProfileResponse;
-import com.ankitsaahariya.dto.response.UserResponse;
 import com.ankitsaahariya.entities.SellerIntentToken;
 import com.ankitsaahariya.entities.SellerProfile;
 import com.ankitsaahariya.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.security.auth.login.AccountNotFoundException;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.InputMismatchException;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -110,7 +107,96 @@ public class SellerServiceImpl implements SellerService {
         return new MessageResponse("Seller intent verified successfully. You can now apply as seller.");
     }
 
+    @Transactional
+    @Override
+    public MessageResponse applyForSeller(SellerApplicationRequest request) {
+        UserEntity user = getCurrentUser();
 
+        // 1️⃣ Seller Intent Validation
+        if (user.getSellerIntentStatus() != SellerIntentStatus.VERIFIED) {
+            throw new BadRequestException("Seller intent not verified. Please verify from email before applying.");
+        }
+
+        // 2️⃣ Check if SellerProfile already exists
+        Optional<SellerProfile> optionalProfile =
+                sellerProfileRepository.findByUserId(user.getId());
+
+        if (optionalProfile.isPresent()) {
+
+            SellerProfile existingProfile = optionalProfile.get();
+
+            switch (existingProfile.getVerificationStatus()) {
+
+                case PENDING:
+                    throw new com.ankitsaahariya.Exception.BadRequestException("Application already pending for review.");
+
+                case APPROVED:
+                    throw new com.ankitsaahariya.Exception.BadRequestException("You are already an approved seller.");
+
+                case REJECTED:
+                    // ✅ Allow reapply
+                    updateSellerProfile(existingProfile, request);
+                    existingProfile.setVerificationStatus(SellerVerificationStatus.PENDING);
+                    existingProfile.setAppliedAt(LocalDateTime.now());
+
+                    sellerProfileRepository.save(existingProfile);
+
+                    return new MessageResponse(
+                            "Application re-submitted successfully and is pending for review."
+                    );
+            }
+        }
+
+        // 3️⃣ GST must be unique
+        if (sellerProfileRepository.existsByGstNumber(request.getGstNumber())) {
+            throw new com.ankitsaahariya.Exception.BadRequestException("GST number already in use. Please provide a valid GST number.");
+        }
+
+        // 4️⃣ Create new SellerProfile
+        SellerProfile profile = new SellerProfile();
+
+        profile.setUser(user);
+        profile.setVerificationStatus(SellerVerificationStatus.PENDING);
+        profile.setAppliedAt(LocalDateTime.now());
+
+        updateSellerProfile(profile, request);
+
+        sellerProfileRepository.save(profile);
+
+        return new MessageResponse(
+                "Seller application submitted successfully. Waiting for admin approval."
+        );
+    }
+
+    private void updateSellerProfile(SellerProfile profile,
+                                     SellerApplicationRequest request) {
+
+        // BUSINESS
+        profile.setBusinessName(request.getBusinessName());
+        profile.setBusinessType(request.getBusinessType());
+        profile.setBusinessAddress(request.getBusinessAddress());
+        profile.setBusinessCity(request.getBusinessCity());
+        profile.setBusinessState(request.getBusinessState());
+        profile.setBusinessPincode(request.getBusinessPincode());
+        profile.setBusinessPhone(request.getBusinessPhone());
+        profile.setBusinessEmail(request.getBusinessEmail());
+        profile.setBusinessDescription(request.getBusinessDescription());
+
+        // LEGAL
+        profile.setGstNumber(request.getGstNumber());
+        profile.setPanNumber(request.getPanNumber());
+        profile.setAadharNumber(request.getAadharNumber());
+
+        // BANK
+        profile.setBankAccountNumber(request.getBankAccountNumber());
+        profile.setBankIfscCode(request.getBankIfscCode());
+        profile.setBankAccountHolderName(request.getBankAccountHolderName());
+        profile.setBankName(request.getBankName());
+        profile.setBankBranch(request.getBankBranch());
+
+        profile.setVerificationStatus(SellerVerificationStatus.PENDING);
+        profile.setAppliedAt(LocalDateTime.now());
+    }
 
     private UserEntity getCurrentUser() {
         return userRepository.findByEmail(
