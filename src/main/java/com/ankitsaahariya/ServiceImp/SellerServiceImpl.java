@@ -7,10 +7,12 @@ import com.ankitsaahariya.Util.PaginationUtil;
 import com.ankitsaahariya.dao.SellerIntentTokenRepository;
 import com.ankitsaahariya.dao.SellerProfileRepository;
 import com.ankitsaahariya.dao.UserRepository;
+import com.ankitsaahariya.domain.Role;
 import com.ankitsaahariya.domain.SellerIntentStatus;
 import com.ankitsaahariya.domain.SellerIntentTokenStatus;
 import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
+import com.ankitsaahariya.dto.request.SellerStatusUpdateRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.PageResponse;
 import com.ankitsaahariya.dto.response.SellerApplicationDetailResponse;
@@ -19,6 +21,8 @@ import com.ankitsaahariya.entities.SellerIntentToken;
 import com.ankitsaahariya.entities.SellerProfile;
 import com.ankitsaahariya.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,6 +43,7 @@ public class SellerServiceImpl implements SellerService {
     private final SellerProfileRepository sellerProfileRepository;
     private final UserRepository userRepository;
     private final static int token_expire_minutes = 30;
+    private static final Logger logger = LoggerFactory.getLogger(SellerServiceImpl.class);
 
 
     @Transactional
@@ -220,13 +225,109 @@ public class SellerServiceImpl implements SellerService {
         );
     }
 
-
+    @Override
     public SellerApplicationDetailResponse getSellerApplicationDetail(Long sellerProfileId) {
 
         SellerProfile profile = sellerProfileRepository.findById(sellerProfileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller application not found"));
 
         return mapToDetailResponse(profile);
+    }
+
+    @Override
+    public MessageResponse updateSellerStatus(Long sellerId, SellerStatusUpdateRequest request) {
+
+        SellerProfile profile =sellerProfileRepository.findByUserId(sellerId)
+                .orElseThrow(()-> new ResourceNotFoundException("Seller not found with this id"+sellerId));
+
+        if(profile.getVerificationStatus() != SellerVerificationStatus.PENDING){
+            throw new BadRequestException("Only pending applications can be updated. Current status: " +
+                    profile.getVerificationStatus());
+        }
+
+        UserEntity admin = getCurrentUser();
+        if(admin.getRole() != Role.ROLE_ADMIN){
+            throw new ForbiddenException("Only admin can update Seller status");
+        }
+
+        UserEntity user = profile.getUser();
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found for seller profile");
+        }
+
+        SellerVerificationStatus newStatus = request.getStatus();
+        switch (newStatus) {
+
+            case APPROVED -> {
+                // Update profile
+                profile.setVerificationStatus(SellerVerificationStatus.APPROVED);
+                profile.setVerifiedAt(LocalDateTime.now());
+                profile.setVerifiedByAdmin(admin);
+                profile.setAdminRemarks(request.getRemarks());
+                profile.setIsActive(true);
+
+                // Update user role
+                user.setRole(Role.ROLE_SELLER);
+                userRepository.save(user);
+
+                // Send approval email
+                try {
+                    emailService.sendSellerApprovalEmail(
+                            user.getEmail(),
+                            profile.getBusinessName(),
+                            user.getFullName()
+                    );
+                } catch (Exception e) {
+                    logger.error("Failed to send approval email", e);
+                    // Don't fail the transaction if email fails
+                }
+
+                // Audit log
+                logger.info("Admin {} approved seller application {}", admin.getId(), sellerId);
+            }
+
+            case REJECTED -> {
+                // Validate remarks
+                if (request.getRemarks() == null || request.getRemarks().isBlank()) {
+                    throw new BadRequestException(
+                            "Rejection reason is required when rejecting application"
+                    );
+                }
+
+                // Update profile
+                profile.setVerificationStatus(SellerVerificationStatus.REJECTED);
+                profile.setVerifiedAt(LocalDateTime.now());
+                profile.setVerifiedByAdmin(admin);
+                profile.setAdminRemarks(request.getRemarks());
+                profile.setIsActive(false);
+
+                // User role remains CUSTOMER - don't change
+
+                // Send rejection email
+                try {
+                    emailService.sendSellerRejectionEmail(
+                            user.getEmail(),
+                            request.getRemarks(),
+                            user.getFullName()
+                    );
+                } catch (Exception e) {
+                    logger.error("Failed to send rejection email", e);
+                }
+
+                // Audit log
+                logger.info("Admin {} rejected seller application {}", admin.getId(), sellerId);
+            }
+
+            default -> throw new BadRequestException(
+                    "Invalid status transition. Only APPROVED or REJECTED allowed"
+            );
+        }
+
+        sellerProfileRepository.save(profile);
+
+        return new MessageResponse(
+                "Seller application " + newStatus.toString().toLowerCase() + " successfully"
+        );
     }
 
 
@@ -272,6 +373,9 @@ public class SellerServiceImpl implements SellerService {
 
                 .build();
     }
+
+
+
     private UserEntity getCurrentUser() {
         return userRepository.findByEmail(
                 SecurityContextHolder.getContext().getAuthentication().getName()

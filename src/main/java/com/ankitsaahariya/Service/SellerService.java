@@ -2,6 +2,7 @@ package com.ankitsaahariya.Service;
 
 import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
+import com.ankitsaahariya.dto.request.SellerStatusUpdateRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.PageResponse;
 import com.ankitsaahariya.dto.response.SellerApplicationDetailResponse;
@@ -22,4 +23,6 @@ public interface SellerService {
     );
 
     SellerApplicationDetailResponse getSellerApplicationDetail(Long sellerProfileId);
+
+    MessageResponse updateSellerStatus(Long sellerId, SellerStatusUpdateRequest request);
 }

@@ -132,6 +132,14 @@ public class GlobleExceptionHandler {
         return buildResponse(HttpStatus.NOT_ACCEPTABLE,ex.getMessage());
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String,Object> > ForbiddenException(ForbiddenException ex){
+        log.warn("ForbiddenException: {}",ex.getMessage(),ex);
+        return buildResponse(HttpStatus.FORBIDDEN,ex.getMessage());
+    }
+
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationException(
             MethodArgumentNotValidException ex) {

@@ -28,12 +28,8 @@ public class EmailServiceImp implements EmailService {
 
     @Override
     public void sendVerificationEmail(String toEmail, String token , String fullName) {
-        try {
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("E-Commerce | Verify Your Account");
+            String subject = "E-Commerce | Verify Your Account";
             String verificationLink =
                     backendUrl + "/api/v1.1/auth/verify-email?token=" + token;
 
@@ -48,22 +44,14 @@ public class EmailServiceImp implements EmailService {
                             "If you did not create an account, please ignore this email.\n\n" +
                             "Thanks & regards,\n" +
                             "Team E-Commerce";
-            message.setText(body);
-            javaMailSender.send(message);
-            logger.info("Verification email sent to {}",toEmail);
-        }catch (Exception ex){
-            logger.error("failed to send verification email to {}: {}",toEmail,ex.getMessage());
-            throw  new EmailSendFailedException("failed to send verification email");
-        }
+
+            sendEmail(toEmail,subject,body);
     }
 
     @Override
     public void sendForgotPasswordRequest(String toEmail, String token, String fullName) {
-        try{
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("E-Commerce | Forgot Password Request");
+
+            String subject = "E-Commerce | Forgot Password Request";
             String resetLink = backendUrl
                     + "/api/v1.1/auth/verifyForgotPasswordRequest?token="
                     + URLEncoder.encode(token, StandardCharsets.UTF_8);
@@ -78,25 +66,14 @@ public class EmailServiceImp implements EmailService {
                             "Best Regards,\n" +
                             "Team E-Commerce Backend";
 
-            message.setText(emailBody);
-            javaMailSender.send(message);
-
-            logger.info("Password reset email sent to {}", toEmail);
-
-        }catch (Exception ex){
-            logger.error("Failed to send password reset email to {}: {}",toEmail,ex.getMessage(),ex);
-            throw new RuntimeException("Failed to send password reset email");
-        }
+            sendEmail(toEmail,subject,emailBody);
     }
 
 
     @Override
     public void SendChangePasswordRequestWithOpt(String toEmail, String otp, String fullName) {
-        try{
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("E-Commerce | Change Account Password Request");
+
+            String subject = "E-Commerce | Change Account Password Request";
 
             String emailBody =
                     "Hi " + fullName + ",\n\n" +
@@ -108,26 +85,14 @@ public class EmailServiceImp implements EmailService {
                             "Best regards,\n" +
                             "Team E-Commerce Backend";
 
-            message.setText(emailBody);
-            javaMailSender.send(message);
-
-            logger.info("Password reset email sent to {}", toEmail);
-
-        }catch (Exception ex){
-            logger.error("Failed to send password reset email to {}: {}",toEmail,ex.getMessage(),ex);
-            throw new RuntimeException("Failed to send password reset email");
-        }
+            sendEmail(toEmail,subject,emailBody);
 
     }
     //        Email for apply become seller , this Email is before filling form
     @Override
     public void sendSellerIntentVerificationEmail(String toEmail, String token, String fullName) {
 
-        try{
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("E-Commerce | Seller Intent Verification Email");
+            String subject = "E-Commerce | Seller Intent Verification Email";
 
             String resetLink = backendUrl
                     + "/api/v1.1/seller/verify-Seller-Intent?token="
@@ -144,14 +109,68 @@ public class EmailServiceImp implements EmailService {
                     "Best regards,\n" +
                     "Team E-Commerce Platform";
 
-            message.setText(emailBody);
+            sendEmail(toEmail, subject, emailBody);
+
+    }
+
+    @Override
+    public void sendSellerApprovalEmail(String email, String businessName, String fullName) {
+        String subject = "Congratulations! Your Seller Application is Approved";
+        String body = String.format("""
+            Dear Seller,
+            
+            Congratulations! Your seller application for "%s" has been approved.
+            
+            You can now:
+            - List your products
+            - Manage your inventory
+            - Receive and fulfill orders
+            
+            Login to your seller dashboard to get started.
+            
+            Best regards,
+            E-commerce Team
+            """, businessName);
+
+        sendEmail(email, subject, body);
+    }
+
+    @Override
+    public void sendSellerRejectionEmail(String email, String reason, String fullName) {
+
+        String subject = "Seller Application Update";
+        String body = String.format("""
+            Dear Seller,
+            
+            Unfortunately, your seller application has been rejected.
+            
+            Reason: %s
+            
+            You can resubmit your application after addressing the issues mentioned above.
+            
+            For any queries, please contact our support team.
+            
+            Best regards,
+            E-commerce Team
+            """, reason);
+
+        sendEmail(email, subject, body);
+    }
+
+
+    private void sendEmail(String to, String subject, String body) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(body);
+            message.setFrom(fromEmail);
+
             javaMailSender.send(message);
-
-            logger.info("Verify seller intent email sent to {}", toEmail);
-
-        }catch (Exception ex){
-            logger.error("Failed to send password reset email to {}: {}",toEmail,ex.getMessage(),ex);
-            throw new RuntimeException("Failed to send password reset email");
+            logger.info(subject, "{}", to);
+        } catch (Exception e) {
+            logger.error("Failed to send email to {}", to, e);
+            throw new RuntimeException("Email sending failed");
         }
     }
 }

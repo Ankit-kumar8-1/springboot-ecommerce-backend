@@ -4,10 +4,12 @@ package com.ankitsaahariya.controller;
 import com.ankitsaahariya.Service.SellerService;
 import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.SellerApplicationRequest;
+import com.ankitsaahariya.dto.request.SellerStatusUpdateRequest;
 import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.PageResponse;
 import com.ankitsaahariya.dto.response.SellerApplicationDetailResponse;
 import com.ankitsaahariya.dto.response.SellerProfileResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,6 +56,16 @@ public class SellerController {
 
         return ResponseEntity.ok(
                 sellerService.getSellerApplicationDetail(sellerProfileId)
+        );
+    }
+
+    @PutMapping("/admin/sellers/{sellerId}/status")
+    public ResponseEntity<MessageResponse> updateSellerStatus(
+            @PathVariable Long sellerId,
+            @Valid @RequestBody SellerStatusUpdateRequest request) {
+
+        return ResponseEntity.ok(
+                sellerService.updateSellerStatus(sellerId, request)
         );
     }
 }
