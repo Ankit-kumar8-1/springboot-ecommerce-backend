@@ -9,4 +9,6 @@ public interface AdminCategoryService {
 
     CategoryResponse createCategory(CategoryRequest request);
 
+    CategoryResponse updateCategory(Long id, CategoryRequest request);
+
 }

@@ -7,6 +7,7 @@ import com.ankitsaahariya.dto.response.CategoryResponse;
 import com.ankitsaahariya.entities.Category;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 @Service
 @AllArgsConstructor
@@ -42,7 +43,50 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         return mapToResponse(saveCategory);
     }
 
-//    Mapper function
+    @Override
+    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Category not found with this Id : "+ id));
+
+        if(!category.getName().equals(request.getName())
+                && categoryRepository.existsByName(request.getName())){
+            throw new RuntimeException("Category with this name is already Exists !");
+        }
+
+        category.setName(request.getName());
+        category.setDescription(request.getDescription());
+        category.setDisplayOrder(request.getDisplayOrder());
+        category.setSlug(request.getSlug());
+        category.setImageUrl(request.getImageUrl());
+
+        if(request.getActive() != null){
+            category.setActive(request.getActive());
+        }
+
+        if(request.getSlug()!=null && !request.getSlug().isBlank()){
+            category.setSlug(request.getSlug());
+        }
+
+        if (request.getParentCategoryId() != null){
+
+            if (request.getParentCategoryId().equals(id)){
+                throw new RuntimeException("Category cannot be its own parent");
+            }
+
+            Category parent = categoryRepository.findById(request.getParentCategoryId())
+                    .orElseThrow(()-> new RuntimeException("Parent category not found"));
+
+            category.setParentCategory(parent);
+        }else {
+            category.setParentCategory(null);
+        }
+
+        Category update = categoryRepository.save(category);
+
+        return mapToResponse(update);
+    }
+
+    //    Mapper function
     private CategoryResponse mapToResponse(Category category) {
 
         return CategoryResponse.builder()

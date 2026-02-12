@@ -3,14 +3,12 @@ package com.ankitsaahariya.controller;
 import com.ankitsaahariya.Service.AdminCategoryService;
 import com.ankitsaahariya.dto.request.CategoryRequest;
 import com.ankitsaahariya.dto.response.CategoryResponse;
+import com.ankitsaahariya.entities.Category;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin/categories")
@@ -23,6 +21,13 @@ public class AdminCategoryController {
     @PostMapping("/create")
     public ResponseEntity<CategoryResponse> createCategory(@Valid  @RequestBody CategoryRequest request){
         return ResponseEntity.ok(adminCategoryService.createCategory(request));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<CategoryResponse> updateCategory(
+            @PathVariable long id,
+            @Valid @RequestBody CategoryRequest request){
+        return ResponseEntity.ok(adminCategoryService.updateCategory(id,request));
     }
 
 }
