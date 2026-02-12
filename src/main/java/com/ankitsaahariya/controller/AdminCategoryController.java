@@ -8,6 +8,10 @@ import com.ankitsaahariya.entities.Category;
 import jakarta.mail.event.MailEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +39,23 @@ public class AdminCategoryController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<MessageResponse> deleteCategory(@PathVariable Long id){
         return ResponseEntity.ok(adminCategoryService.deleteCategory(id));
-
     }
 
+
+    @GetMapping
+    public ResponseEntity<Page<CategoryResponse>> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "displayOrder") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return ResponseEntity.ok(adminCategoryService.getAllCategories(pageable));
+    }
 }

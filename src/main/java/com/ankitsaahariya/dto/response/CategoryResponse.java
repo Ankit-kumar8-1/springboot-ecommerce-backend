@@ -2,11 +2,12 @@ package com.ankitsaahariya.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 @Data
-@Builder
 public class CategoryResponse {
     private Long id;
     private String name;
