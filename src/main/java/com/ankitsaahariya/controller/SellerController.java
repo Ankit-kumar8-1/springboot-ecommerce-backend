@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class SellerController {
     private final SellerService sellerService;
 
+
     @PostMapping("/requestSellerIntent")
     public ResponseEntity<MessageResponse>  requestSellerIntent(Authentication authentication){
         String email = authentication.getName();
@@ -50,6 +51,7 @@ public class SellerController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{sellerProfileId}")
     public ResponseEntity<SellerApplicationDetailResponse> getSellerApplicationDetail(
             @PathVariable Long sellerProfileId) {
@@ -59,6 +61,8 @@ public class SellerController {
         );
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/sellers/{sellerId}/status")
     public ResponseEntity<MessageResponse> updateSellerStatus(
             @PathVariable Long sellerId,
