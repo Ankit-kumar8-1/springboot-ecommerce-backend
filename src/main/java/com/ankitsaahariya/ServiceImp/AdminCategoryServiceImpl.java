@@ -4,6 +4,7 @@ import com.ankitsaahariya.Service.AdminCategoryService;
 import com.ankitsaahariya.dao.CategoryRepository;
 import com.ankitsaahariya.dto.request.CategoryRequest;
 import com.ankitsaahariya.dto.response.CategoryResponse;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.entities.Category;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -84,6 +85,27 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         Category update = categoryRepository.save(category);
 
         return mapToResponse(update);
+    }
+
+    @Override
+    public MessageResponse deleteCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(()-> new RuntimeException("Category not found"));
+
+        if(category.getActive()){
+            throw new RuntimeException("We not delete active category !");
+        }
+        // Check child categories
+        if (categoryRepository.existsByParentCategoryId(categoryId)) {
+            throw new RuntimeException("Cannot delete category with subcategories");
+        }
+//        // Check products
+//        if (productRepository.existsByCategoryId(categoryId)) {
+//            throw new RuntimeException("Cannot delete category with assigned products");
+//        }
+
+        categoryRepository.delete(category);
+        return new MessageResponse("Category Delete successfully !");
     }
 
     //    Mapper function

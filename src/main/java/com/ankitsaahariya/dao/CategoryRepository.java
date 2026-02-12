@@ -15,11 +15,16 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     boolean existsByName(String name);
     boolean existsBySlug(String slug);
 
+    // Check if category has children
+    boolean existsByParentCategoryId(Long parentId);
+
     // Root categories (active only)
     List<Category> findByParentCategoryIsNullAndActiveTrueOrderByDisplayOrderAsc();
 
     // All root categories (admin use)
     List<Category> findByParentCategoryIsNull();
+
+
 
     // Active subcategories of a parent
     List<Category> findByParentCategoryIdAndActiveTrueOrderByDisplayOrderAsc(Long parentId);

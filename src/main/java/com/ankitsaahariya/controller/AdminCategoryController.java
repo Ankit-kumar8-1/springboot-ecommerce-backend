@@ -3,7 +3,9 @@ package com.ankitsaahariya.controller;
 import com.ankitsaahariya.Service.AdminCategoryService;
 import com.ankitsaahariya.dto.request.CategoryRequest;
 import com.ankitsaahariya.dto.response.CategoryResponse;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.entities.Category;
+import jakarta.mail.event.MailEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,12 @@ public class AdminCategoryController {
             @PathVariable long id,
             @Valid @RequestBody CategoryRequest request){
         return ResponseEntity.ok(adminCategoryService.updateCategory(id,request));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<MessageResponse> deleteCategory(@PathVariable Long id){
+        return ResponseEntity.ok(adminCategoryService.deleteCategory(id));
+
     }
 
 }
