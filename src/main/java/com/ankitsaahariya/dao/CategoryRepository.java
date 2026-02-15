@@ -2,6 +2,7 @@ package com.ankitsaahariya.dao;
 
 import com.ankitsaahariya.entities.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,17 +19,16 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     // Check if category has children
     boolean existsByParentCategoryId(Long parentId);
 
-    // Root categories (active only)
-    List<Category> findByParentCategoryIsNullAndActiveTrueOrderByDisplayOrderAsc();
+    // ROOT + SUBCATEGORIES (single query)
+    @Query("""
+        SELECT DISTINCT c
+        FROM Category c
+        LEFT JOIN FETCH c.subCategories sc
+        WHERE c.parentCategory IS NULL
+        AND c.active = true
+        ORDER BY c.displayOrder ASC
+    """)
+    List<Category> findActiveRootCategoriesWithChildren();
 
-    // All root categories (admin use)
-    List<Category> findByParentCategoryIsNull();
 
-
-
-    // Active subcategories of a parent
-    List<Category> findByParentCategoryIdAndActiveTrueOrderByDisplayOrderAsc(Long parentId);
-
-    // All active categories
-    List<Category> findByActiveTrueOrderByDisplayOrderAsc();
 }

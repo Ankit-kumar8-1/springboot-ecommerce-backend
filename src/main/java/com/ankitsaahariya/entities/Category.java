@@ -21,7 +21,7 @@ public class Category {
     private Long id;
 
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;  // "Electronics"
 
     @Column(nullable = false, unique = true)
@@ -37,13 +37,9 @@ public class Category {
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
 
+    @OrderBy("displayOrder ASC")
     @OneToMany(mappedBy = "parentCategory")
     private List<Category> subCategories = new ArrayList<>();
-
-
-
-    @OneToMany(mappedBy = "category")
-    private List<Product> products = new ArrayList<>();
 
 
 

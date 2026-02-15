@@ -97,7 +97,7 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(()-> new RuntimeException("Category not found"));
 
-        if(category.getActive()){
+        if(!category.getActive()){
             throw new RuntimeException("We not delete active category !");
         }
         // Check child categories
