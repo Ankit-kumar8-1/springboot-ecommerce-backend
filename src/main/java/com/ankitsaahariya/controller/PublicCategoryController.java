@@ -34,4 +34,11 @@ public class PublicCategoryController {
     public ResponseEntity<CategoryResponse> getCategoryBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(publicCategoryService.getCategoryBySlug(slug));
     }
+
+    @GetMapping("/parent/{parentId}/subcategories")
+    public ResponseEntity<List<CategoryResponse>> getSubCategories(
+            @PathVariable Long parentId) {
+
+        return ResponseEntity.ok(publicCategoryService.getSubCategories(parentId));
+    }
 }

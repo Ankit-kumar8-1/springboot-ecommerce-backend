@@ -12,4 +12,6 @@ public interface PublicCategoryService {
 
     CategoryResponse getCategoryBySlug(String slug);
 
+    List<CategoryResponse> getSubCategories(Long parentId);
+
 }

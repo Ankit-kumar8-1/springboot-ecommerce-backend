@@ -62,6 +62,27 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
         return mapToTree(category);
     }
 
+    @Override
+    public List<CategoryResponse> getSubCategories(Long parentId) {
+
+        List<Category> categories =
+                categoryRepository.findByParentCategoryIdAndActiveTrueOrderByDisplayOrderAsc(parentId);
+
+        return categories.stream()
+                .map(category -> {
+                    CategoryResponse res = new CategoryResponse();
+
+                    res.setId(category.getId());
+                    res.setName(category.getName());
+                    res.setSlug(category.getSlug());
+                    res.setImageUrl(category.getImageUrl());
+                    res.setDisplayOrder(category.getDisplayOrder());
+
+                    return res;
+                })
+                .toList();
+    }
+
 
     private CategoryResponse mapToTree(Category category) {
         CategoryResponse res = new CategoryResponse();
