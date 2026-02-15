@@ -19,7 +19,6 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     // Check if category has children
     boolean existsByParentCategoryId(Long parentId);
 
-
     Optional<Category> findByIdAndActiveTrue(Long id);
 
     List<Category> findByParentCategoryIsNullAndActiveTrueOrderByDisplayOrderAsc();
@@ -27,6 +26,8 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     List<Category> findByParentCategoryIdAndActiveTrueOrderByDisplayOrderAsc(Long parentId);
 
     Optional<Category> findBySlugAndActiveTrue(String slug);
+
+    List<Category> findByNameContainingIgnoreCaseAndActiveTrue(String keyword);
 
     List<Category> findByActiveTrueOrderByDisplayOrderAsc();
 

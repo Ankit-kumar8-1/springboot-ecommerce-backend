@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class AdminCategoryServiceImpl implements AdminCategoryService {
@@ -117,6 +119,27 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     public Page<CategoryResponse> getAllCategories(Pageable pageable) {
         Page<Category> categoryPage = categoryRepository.findAll(pageable);
         return categoryPage.map(this::mapToResponse);
+    }
+
+
+    @Override
+    public List<CategoryResponse> searchCategories(String keyword) {
+
+        List<Category> categories =
+                categoryRepository.findByNameContainingIgnoreCaseAndActiveTrue(keyword);
+
+        return categories.stream()
+                .map(category -> {
+                    CategoryResponse res = new CategoryResponse();
+
+                    res.setId(category.getId());
+                    res.setName(category.getName());
+                    res.setSlug(category.getSlug());
+                    res.setImageUrl(category.getImageUrl());
+
+                    return res;
+                })
+                .toList();
     }
 
     //    Mapper function

@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/categories")
 @RequiredArgsConstructor
@@ -57,5 +59,12 @@ public class AdminCategoryController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         return ResponseEntity.ok(adminCategoryService.getAllCategories(pageable));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CategoryResponse>> searchCategories(
+            @RequestParam String keyword) {
+
+        return ResponseEntity.ok(adminCategoryService.searchCategories(keyword));
     }
 }
