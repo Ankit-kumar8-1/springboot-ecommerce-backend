@@ -71,4 +71,5 @@ public class Category {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
 }

@@ -19,16 +19,15 @@ public interface CategoryRepository extends JpaRepository<Category,Long> {
     // Check if category has children
     boolean existsByParentCategoryId(Long parentId);
 
-    // ROOT + SUBCATEGORIES (single query)
-    @Query("""
-        SELECT DISTINCT c
-        FROM Category c
-        LEFT JOIN FETCH c.subCategories sc
-        WHERE c.parentCategory IS NULL
-        AND c.active = true
-        ORDER BY c.displayOrder ASC
-    """)
-    List<Category> findActiveRootCategoriesWithChildren();
+
+    Optional<Category> findByIdAndActiveTrue(Long id);
+
+    List<Category> findByParentCategoryIsNullAndActiveTrueOrderByDisplayOrderAsc();
+
+    List<Category> findByParentCategoryIdAndActiveTrueOrderByDisplayOrderAsc(Long parentId);
+
+    List<Category> findByActiveTrueOrderByDisplayOrderAsc();
+
 
 
 }

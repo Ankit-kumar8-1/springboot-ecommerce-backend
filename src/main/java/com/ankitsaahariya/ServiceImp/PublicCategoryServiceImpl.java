@@ -24,7 +24,8 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
     @Override
     public List<CategoryResponse> getRootCategories() {
 
-        List<Category> roots = categoryRepository.findActiveRootCategoriesWithChildren();
+        List<Category> roots = categoryRepository
+                .findByParentCategoryIsNullAndActiveTrueOrderByDisplayOrderAsc();
 
         List<Long> ids = roots.stream()
                 .flatMap(root -> {
@@ -32,7 +33,7 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
                     all.add(root);
                     all.addAll(root.getSubCategories());
                     return all.stream();
-    })
+                })
                 .map(Category::getId)
                 .toList();
 
@@ -42,6 +43,46 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
                 .map(root -> mapToResponse(root,productCountMap))
                 .toList();
 }
+
+    @Override
+    public CategoryResponse getCategoryTreeById(Long id) {
+        Category category = categoryRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(()-> new RuntimeException("Category is not found !"));
+
+        return mapToTree(category);
+    }
+
+
+    private CategoryResponse mapToTree(Category category) {
+        CategoryResponse res = new CategoryResponse();
+
+        res.setId(category.getId());
+        res.setName(category.getName());
+        res.setSlug(category.getSlug());
+        res.setDescription(category.getDescription());
+        res.setImageUrl(category.getImageUrl());
+        res.setActive(category.getActive());
+        res.setDisplayOrder(category.getDisplayOrder());
+        res.setCreatedAt(category.getCreatedAt());
+        res.setUpdatedAt(category.getUpdatedAt());
+
+        if (category.getParentCategory() != null) {
+            res.setParentCategoryId(category.getParentCategory().getId());
+            res.setParentCategoryName(category.getParentCategory().getName());
+        }
+
+        List<Category> children = categoryRepository
+                .findByParentCategoryIdAndActiveTrueOrderByDisplayOrderAsc(category.getId());
+
+        List<CategoryResponse> childResponses =
+                children.stream()
+                        .map(this::mapToTree)
+                        .toList();
+
+        res.setSubCategories(childResponses);
+
+        return  res;
+    }
 
     private CategoryResponse mapToResponse(Category category, Map<Long, Integer> countMap) {
 
@@ -57,12 +98,20 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
         res.setCreatedAt(category.getCreatedAt());
         res.setUpdatedAt(category.getUpdatedAt());
 
+        // Parent mapping
+        if (category.getParentCategory() != null) {
+            res.setParentCategoryId(category.getParentCategory().getId());
+            res.setParentCategoryName(category.getParentCategory().getName());
+        }
+
+        // Product count
         res.setProductCount(
                 countMap.getOrDefault(category.getId(), 0)
         );
 
-        // Map subcategories
-        if (category.getSubCategories() != null) {
+        // ⭐ SubCategories mapping (recursive)
+        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+
             List<CategoryResponse> children =
                     category.getSubCategories().stream()
                             .filter(Category::getActive)
@@ -73,8 +122,8 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
         }
 
         return res;
-
     }
+
 
 
     private Map<Long, Integer> getProductCountMap(List<Long> ids) {

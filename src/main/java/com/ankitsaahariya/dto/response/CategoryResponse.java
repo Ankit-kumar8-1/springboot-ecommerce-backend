@@ -27,7 +27,7 @@ public class CategoryResponse {
 
     private Integer productCount; // optional, service layer me set hoga
 
-    private List<CategoryResponse> subCategories;
+    private List<CategoryResponse> subCategories = new ArrayList<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

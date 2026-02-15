@@ -8,4 +8,6 @@ public interface PublicCategoryService {
 
     List<CategoryResponse> getRootCategories();
 
+    CategoryResponse getCategoryTreeById(Long id);
+
 }
