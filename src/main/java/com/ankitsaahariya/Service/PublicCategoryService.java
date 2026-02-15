@@ -10,4 +10,6 @@ public interface PublicCategoryService {
 
     CategoryResponse getCategoryTreeById(Long id);
 
+    CategoryResponse getCategoryBySlug(String slug);
+
 }

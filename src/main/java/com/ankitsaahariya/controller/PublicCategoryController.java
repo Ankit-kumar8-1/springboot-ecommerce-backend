@@ -29,4 +29,9 @@ public class PublicCategoryController {
     ){
         return ResponseEntity.ok(publicCategoryService.getCategoryTreeById(id));
     }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<CategoryResponse> getCategoryBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(publicCategoryService.getCategoryBySlug(slug));
+    }
 }

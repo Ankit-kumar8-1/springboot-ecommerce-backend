@@ -52,6 +52,16 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
         return mapToTree(category);
     }
 
+    @Override
+    public CategoryResponse getCategoryBySlug(String slug) {
+
+        Category category = categoryRepository
+                .findBySlugAndActiveTrue(slug)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        return mapToTree(category);
+    }
+
 
     private CategoryResponse mapToTree(Category category) {
         CategoryResponse res = new CategoryResponse();
