@@ -12,4 +12,6 @@ public interface AdminProductService {
             Long sellerId,
             String search
     );
+
+    ProductResponse getProductById(Long productId);
 }
