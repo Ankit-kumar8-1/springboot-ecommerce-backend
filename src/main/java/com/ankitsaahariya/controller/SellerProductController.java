@@ -55,4 +55,8 @@ public class SellerProductController {
         return ResponseEntity.ok(sellerProductService.getSellerProducts(pageable, search));
     }
 
+    @GetMapping("/getByProductId/{id}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable  Long id){
+        return ResponseEntity.ok(sellerProductService.getProductById(id));
+    }
 }

@@ -16,4 +16,6 @@ public interface SellerProductService {
     MessageResponse deleteProduct(Long productId);
 
     Page<ProductResponse> getSellerProducts(Pageable pageable, String search);
+
+    ProductResponse getProductById(Long productId);
 }
