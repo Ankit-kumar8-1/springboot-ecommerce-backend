@@ -2,6 +2,7 @@ package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.SellerProductService;
 import com.ankitsaahariya.dto.request.ProductRequest;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.ProductResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +30,9 @@ public class SellerProductController {
         return ResponseEntity.ok(sellerProductService.updateProduct(id,request));
     }
 
+    @DeleteMapping("delete/{productId}")
+    public ResponseEntity<MessageResponse> deleteProduct(@PathVariable Long productId){
+        return ResponseEntity.ok(sellerProductService.deleteProduct(productId));
+    }
 
 }

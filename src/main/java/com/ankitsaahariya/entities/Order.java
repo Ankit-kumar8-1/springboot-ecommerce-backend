@@ -2,7 +2,6 @@ package com.ankitsaahariya.entities;
 
 
 import com.ankitsaahariya.domain.OrderStatus;
-import com.ankitsaahariya.domain.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

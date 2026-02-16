@@ -7,12 +7,15 @@ import com.ankitsaahariya.dao.SellerProfileRepository;
 import com.ankitsaahariya.dao.UserRepository;
 import com.ankitsaahariya.domain.SellerVerificationStatus;
 import com.ankitsaahariya.dto.request.ProductRequest;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.ProductResponse;
 import com.ankitsaahariya.entities.Category;
 import com.ankitsaahariya.entities.Product;
 import com.ankitsaahariya.entities.SellerProfile;
 import com.ankitsaahariya.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +103,29 @@ public class SellerProductServiceImpl  implements SellerProductService {
 
         Product updatedProduct = productRepository.save(product);
         return mapToResponse(updatedProduct);
+    }
+
+    @Override
+    public MessageResponse deleteProduct(Long productId) {
+        SellerProfile seller = getCurrentSeller();
+        validateSellerEligibility(seller);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new RuntimeException("Product Not found !"));
+
+        if(!product.getSeller().getId().equals(seller.getId())){
+            throw new RuntimeException("you can delete only  your own products !");
+        }
+        boolean hasOrders = productRepository.existsInOrders(productId);
+        if (hasOrders){
+            throw new RuntimeException("Cannot delete product with existing orders");
+        }
+
+        productRepository.delete(product);
+        seller.setTotalProducts(Math.max(0,seller.getTotalProducts() -1));
+        sellerProfileRepository.save(seller);
+
+        return new MessageResponse("Product deleted Successfully !");
     }
 
     private ProductResponse mapToResponse(Product product) {

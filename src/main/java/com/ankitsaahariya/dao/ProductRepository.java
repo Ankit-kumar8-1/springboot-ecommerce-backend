@@ -3,6 +3,7 @@ package com.ankitsaahariya.dao;
 import com.ankitsaahariya.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -20,4 +21,11 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
         GROUP BY p.category.id
     """)
     List<Object[]> countProductsByCategoryIds(List<Long> categoryIds);
+
+    @Query("""
+        SELECT CASE WHEN COUNT(oi) > 0 THEN true ELSE false END
+        FROM OrderItem oi
+        WHERE oi.product.id = :productId
+    """)
+    boolean existsInOrders(@Param("productId") Long productId);
 }
