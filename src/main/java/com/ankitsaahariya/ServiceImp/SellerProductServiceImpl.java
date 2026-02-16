@@ -128,6 +128,27 @@ public class SellerProductServiceImpl  implements SellerProductService {
         return new MessageResponse("Product deleted Successfully !");
     }
 
+    @Override
+    public Page<ProductResponse> getSellerProducts(Pageable pageable, String search) {
+        SellerProfile seller = getCurrentSeller();
+
+        Page<Product> productPage;
+
+        if(search!= null && !search.isBlank()){
+            String searchPattern = "%" + search.toLowerCase() + "%";
+            productPage = productRepository.findAll((root, query, cb) -> cb.and(
+                            cb.equal(root.get("seller").get("id"), seller.getId()),
+                            cb.or(
+                                    cb.like(cb.lower(root.get("title")), searchPattern),
+                                    cb.like(cb.lower(root.get("description")), searchPattern))),
+                    pageable);
+        } else {
+            productPage = productRepository.findBySellerId(seller.getId(), pageable);
+        }
+
+        return productPage.map(this::mapToResponse);
+    }
+
     private ProductResponse mapToResponse(Product product) {
 
         ProductResponse response = new ProductResponse();

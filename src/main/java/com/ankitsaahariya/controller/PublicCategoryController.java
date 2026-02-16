@@ -2,7 +2,12 @@ package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.PublicCategoryService;
 import com.ankitsaahariya.dto.response.CategoryResponse;
+import com.ankitsaahariya.dto.response.ProductResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,5 +43,7 @@ public class PublicCategoryController {
 
         return ResponseEntity.ok(publicCategoryService.getSubCategories(parentId));
     }
+
+
 
 }
