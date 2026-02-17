@@ -62,4 +62,14 @@ public class PublicProductController {
         return ResponseEntity.ok(
                 publicProductService.getProductsByCategory(categoryId, pageable));
     }
+
+    @GetMapping("/getProductBySeller/{sellerID}")
+    public ResponseEntity<Page<ProductResponse>> getProductBySeller(
+            @PathVariable Long sellerID,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Pageable pageable = PageRequest.of(page,size);
+        return ResponseEntity.ok(publicProductService.getProductsBySeller(sellerID,pageable));
+    }
 }

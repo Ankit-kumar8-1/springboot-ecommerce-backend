@@ -113,6 +113,23 @@ public class PublicProductServiceImpl implements PublicProductService {
         return productPage.map(this::mapToResponse);
     }
 
+    @Override
+    public Page<ProductResponse> getProductsBySeller(Long sellerId, Pageable pageable) {
+        SellerProfile seller = sellerProfileRepository.findById(sellerId).
+                orElseThrow(()-> new RuntimeException("Seller not found With this Id : "+ sellerId));
+
+        if (!seller.getIsActive()){
+            throw new RuntimeException("Seller not active !");
+        }
+        Specification<Product> spec = Specification
+                .where(hasPositiveQuantity())
+                .and(hasSeller(sellerId));
+
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+        return productPage.map(this::mapToResponse);
+    }
+
     private ProductResponse mapToDetailResponse(Product product) {
         ProductResponse response = mapToResponse(product);
 
