@@ -57,6 +57,22 @@ public class AdminProductServiceImpl implements AdminProductService {
         return mapToDetailResponse(product);
     }
 
+    @Override
+    public List<ProductResponse> searchProducts(String keyword) {
+        if(keyword == null || keyword.isBlank()){
+            throw new RuntimeException("Search Keyword is required !");
+        }
+        String searchPattern = "%" + keyword.toLowerCase() + "%";
+
+        List<Product> products = productRepository.findAll((root, query, cb) -> cb.or(
+                cb.like(cb.lower(root.get("title")), searchPattern),
+                cb.like(cb.lower(root.get("description")), searchPattern)));
+
+        return products.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private ProductResponse mapToDetailResponse(Product product) {
         ProductResponse response = mapToResponse(product);
 

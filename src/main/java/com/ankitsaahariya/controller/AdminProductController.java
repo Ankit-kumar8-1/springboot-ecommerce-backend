@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/products")
 @RequiredArgsConstructor
@@ -44,4 +46,11 @@ public class AdminProductController {
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(adminProductService.getProductById(id));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductResponse>>  searchByKeyword(@RequestParam String keyword){
+        return ResponseEntity.ok(adminProductService.searchProducts(keyword));
+    }
+
+
 }
