@@ -1,6 +1,7 @@
 package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.AdminProductService;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.ProductResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler;
 
 import java.util.List;
 
@@ -50,6 +52,11 @@ public class AdminProductController {
     @GetMapping("/search")
     public ResponseEntity<List<ProductResponse>>  searchByKeyword(@RequestParam String keyword){
         return ResponseEntity.ok(adminProductService.searchProducts(keyword));
+    }
+
+    @PutMapping("/{id}/toggle-status")
+    public ResponseEntity<MessageResponse> toggleProduct(@PathVariable Long id){
+        return ResponseEntity.ok(adminProductService.toggleProductStatus(id));
     }
 
 

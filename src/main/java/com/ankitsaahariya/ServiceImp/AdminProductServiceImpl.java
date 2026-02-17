@@ -3,6 +3,7 @@ package com.ankitsaahariya.ServiceImp;
 import com.ankitsaahariya.Service.AdminProductService;
 import com.ankitsaahariya.dao.CategoryRepository;
 import com.ankitsaahariya.dao.ProductRepository;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.ProductResponse;
 import com.ankitsaahariya.entities.Product;
 import com.ankitsaahariya.entities.Review;
@@ -71,6 +72,21 @@ public class AdminProductServiceImpl implements AdminProductService {
         return products.stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public MessageResponse toggleProductStatus(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new RuntimeException("Product not found with this Id : " +productId));
+
+        product.setIsActive(!product.getIsActive());
+        productRepository.save(product);
+
+        if(product.getIsActive()){
+            return new MessageResponse("Product activated successfully !");
+        }else {
+            return new MessageResponse("Product deactivated successful !");
+        }
     }
 
     private ProductResponse mapToDetailResponse(Product product) {

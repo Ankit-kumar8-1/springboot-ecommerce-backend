@@ -37,6 +37,9 @@ public class Product {
 
     private int numRatings;
 
+    @Column(nullable = false)
+    private Boolean isActive = true;
+
     @ManyToOne
     private Category category;
 

@@ -1,5 +1,6 @@
 package com.ankitsaahariya.Service;
 
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +19,6 @@ public interface AdminProductService {
     ProductResponse getProductById(Long productId);
 
     List<ProductResponse> searchProducts(String keyword);
+
+    MessageResponse toggleProductStatus(Long productId);
 }
