@@ -21,4 +21,6 @@ public interface AdminProductService {
     List<ProductResponse> searchProducts(String keyword);
 
     MessageResponse toggleProductStatus(Long productId);
+
+    MessageResponse deleteProductById(Long ProductId);
 }

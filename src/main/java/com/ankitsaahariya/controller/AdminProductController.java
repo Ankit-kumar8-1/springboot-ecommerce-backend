@@ -59,5 +59,9 @@ public class AdminProductController {
         return ResponseEntity.ok(adminProductService.toggleProductStatus(id));
     }
 
+    @DeleteMapping("/delete/{productId}")
+    public ResponseEntity<MessageResponse> deleteProduct(@PathVariable Long id){
+        return  ResponseEntity.ok(adminProductService.deleteProductById(id));
+    }
 
 }

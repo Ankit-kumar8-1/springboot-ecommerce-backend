@@ -89,6 +89,24 @@ public class AdminProductServiceImpl implements AdminProductService {
         }
     }
 
+    @Override
+    public MessageResponse deleteProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new RuntimeException("Product not found with this Id: " + productId));
+
+        if(product.getIsActive()){
+            throw new RuntimeException("Active Product cannot be deleted !");
+        }
+
+        boolean hasOrder = productRepository.existsInOrders(productId);
+        if (hasOrder){
+            throw new RuntimeException("Cannot deleted product with existing Orders !");
+        }
+
+        productRepository.delete(product);
+        return new MessageResponse("Product deleted Successfully !");
+    }
+
     private ProductResponse mapToDetailResponse(Product product) {
         ProductResponse response = mapToResponse(product);
 
