@@ -5,6 +5,7 @@ import com.ankitsaahariya.dao.CategoryRepository;
 import com.ankitsaahariya.dao.ProductRepository;
 import com.ankitsaahariya.dao.SellerProfileRepository;
 import com.ankitsaahariya.dto.response.ProductResponse;
+import com.ankitsaahariya.entities.Category;
 import com.ankitsaahariya.entities.Product;
 import com.ankitsaahariya.entities.Review;
 import com.ankitsaahariya.entities.SellerProfile;
@@ -95,6 +96,21 @@ public class PublicProductServiceImpl implements PublicProductService {
         }
 
         return mapToDetailResponse(product);
+    }
+
+    @Override
+    public Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable) {
+        // Validate category
+        Category category = categoryRepository.findByIdAndActiveTrue(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found or inactive"));
+
+        Specification<Product> spec = Specification
+                .where(hasPositiveQuantity())
+                .and(hasCategory(categoryId));
+
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+        return productPage.map(this::mapToResponse);
     }
 
     private ProductResponse mapToDetailResponse(Product product) {

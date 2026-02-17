@@ -20,4 +20,6 @@ public interface PublicProductService {
     );
 
     ProductResponse getProductById(Long productId);
+
+    Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable);
 }
