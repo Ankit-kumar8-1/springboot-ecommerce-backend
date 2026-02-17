@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/public/products")
@@ -71,5 +73,11 @@ public class PublicProductController {
     ){
         Pageable pageable = PageRequest.of(page,size);
         return ResponseEntity.ok(publicProductService.getProductsBySeller(sellerID,pageable));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductResponse>> searchProducts(
+            @RequestParam String keyword) {
+        return ResponseEntity.ok(publicProductService.searchProducts(keyword));
     }
 }

@@ -4,6 +4,8 @@ import com.ankitsaahariya.dto.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface PublicProductService {
 
     Page<ProductResponse> getAllProducts(
@@ -24,4 +26,6 @@ public interface PublicProductService {
     Page<ProductResponse> getProductsByCategory(Long categoryId, Pageable pageable);
 
     Page<ProductResponse> getProductsBySeller(Long sellerId, Pageable pageable);
+
+    List<ProductResponse> searchProducts(String keyword);
 }

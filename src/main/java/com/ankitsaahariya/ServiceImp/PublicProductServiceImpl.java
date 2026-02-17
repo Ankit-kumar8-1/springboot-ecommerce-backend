@@ -130,6 +130,27 @@ public class PublicProductServiceImpl implements PublicProductService {
         return productPage.map(this::mapToResponse);
     }
 
+    @Override
+    public List<ProductResponse> searchProducts(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            throw new RuntimeException("Search keyword is required");
+        }
+
+        String searchPattern = "%" + keyword.toLowerCase() + "%";
+
+        Specification<Product> spec = Specification
+                .where(hasPositiveQuantity())
+                .and(matchSearch(keyword));
+
+        List<Product> products = productRepository.findAll(spec, PageRequest.of(0, 20)).getContent();
+
+        return products.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+
+
     private ProductResponse mapToDetailResponse(Product product) {
         ProductResponse response = mapToResponse(product);
 
