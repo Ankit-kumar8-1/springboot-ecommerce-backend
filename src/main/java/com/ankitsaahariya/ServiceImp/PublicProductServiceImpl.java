@@ -149,6 +149,24 @@ public class PublicProductServiceImpl implements PublicProductService {
                 .toList();
     }
 
+    @Override
+    public List<ProductResponse> getRelatedProducts(Long productId, int limit) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        Specification<Product> spec = Specification
+                .where(hasPositiveQuantity())
+                .and(hasCategory(product.getCategory().getId()))
+                .and((root, query, cb) -> cb.notEqual(root.get("id"), productId));
+
+        List<Product> relatedProducts = productRepository.findAll(
+                spec,
+                PageRequest.of(0, limit)).getContent();
+
+        return relatedProducts.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 
 
     private ProductResponse mapToDetailResponse(Product product) {

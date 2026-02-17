@@ -28,4 +28,6 @@ public interface PublicProductService {
     Page<ProductResponse> getProductsBySeller(Long sellerId, Pageable pageable);
 
     List<ProductResponse> searchProducts(String keyword);
+
+    List<ProductResponse> getRelatedProducts(Long productId, int limit);
 }

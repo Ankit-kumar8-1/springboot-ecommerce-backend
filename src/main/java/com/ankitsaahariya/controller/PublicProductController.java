@@ -80,4 +80,11 @@ public class PublicProductController {
             @RequestParam String keyword) {
         return ResponseEntity.ok(publicProductService.searchProducts(keyword));
     }
+
+    @GetMapping("/{id}/related")
+    public ResponseEntity<List<ProductResponse>> getRelatedProducts(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "8") int limit) {
+        return ResponseEntity.ok(publicProductService.getRelatedProducts(id, limit));
+    }
 }
