@@ -6,6 +6,7 @@ import com.ankitsaahariya.dao.ProductRepository;
 import com.ankitsaahariya.dao.SellerProfileRepository;
 import com.ankitsaahariya.dto.response.ProductResponse;
 import com.ankitsaahariya.entities.Product;
+import com.ankitsaahariya.entities.Review;
 import com.ankitsaahariya.entities.SellerProfile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -80,6 +83,50 @@ public class PublicProductServiceImpl implements PublicProductService {
         Page<Product> productPage = productRepository.findAll(spec, sortedPageable);
 
         return productPage.map(this::mapToResponse);
+    }
+
+    @Override
+    public ProductResponse getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(()-> new RuntimeException("Product not found with this Product Id : "+ productId));
+
+        if (product.getQuantity() <= 0){
+            throw  new RuntimeException("Product currently Out of stock !");
+        }
+
+        return mapToDetailResponse(product);
+    }
+
+    private ProductResponse mapToDetailResponse(Product product) {
+        ProductResponse response = mapToResponse(product);
+
+        // Add recent reviews (last 5)
+        if (product.getReviews() != null && !product.getReviews().isEmpty()) {
+            List<ProductResponse.ReviewSummary> reviewSummaries = product.getReviews()
+                    .stream()
+                    .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+                    .limit(5)
+                    .map(this::mapReviewToSummary)
+                    .toList();
+
+            response.setRecentReviews(reviewSummaries);
+        }
+
+        return response;
+    }
+
+    private ProductResponse.ReviewSummary mapReviewToSummary(Review review) {
+        ProductResponse.ReviewSummary summary = new ProductResponse.ReviewSummary();
+        summary.setId(review.getId());
+        summary.setReviewText(review.getReviewText());
+        summary.setRating(review.getRating());
+        summary.setCreatedAt(review.getCreatedAt());
+
+        if (review.getUser() != null) {
+            summary.setUserName(review.getUser().getFullName());
+        }
+
+        return summary;
     }
 
     private Pageable applySorting(Pageable pageable, String sort) {

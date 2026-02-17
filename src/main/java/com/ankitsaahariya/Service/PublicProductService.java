@@ -18,4 +18,6 @@ public interface PublicProductService {
             String search,
             String sort
     );
+
+    ProductResponse getProductById(Long productId);
 }
