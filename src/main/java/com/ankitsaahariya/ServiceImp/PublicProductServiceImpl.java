@@ -1,0 +1,190 @@
+package com.ankitsaahariya.ServiceImp;
+
+import com.ankitsaahariya.Service.PublicProductService;
+import com.ankitsaahariya.dao.CategoryRepository;
+import com.ankitsaahariya.dao.ProductRepository;
+import com.ankitsaahariya.dao.SellerProfileRepository;
+import com.ankitsaahariya.dto.response.ProductResponse;
+import com.ankitsaahariya.entities.Product;
+import com.ankitsaahariya.entities.SellerProfile;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+
+@Service
+@RequiredArgsConstructor
+public class PublicProductServiceImpl implements PublicProductService {
+    private final SellerProfileRepository sellerProfileRepository;
+    private  final ProductRepository  productRepository;
+    private final CategoryRepository categoryRepository;
+
+    @Override
+    public Page<ProductResponse> getAllProducts(
+            Pageable pageable,
+            Long categoryId,
+            Long sellerId,
+            Integer minPrice,
+            Integer maxPrice,
+            String color,
+            String sizes,
+            Integer minRating,
+            String search,
+            String sort) {
+
+
+        Specification<Product> spec = Specification.where(hasPositiveQuantity());
+
+        if (categoryId != null){
+            spec = spec.and(hasCategory(categoryId));
+        }
+
+        if (sellerId != null){
+            SellerProfile seller = sellerProfileRepository.findById(sellerId)
+                    .orElseThrow(()-> new RuntimeException("Seller not found with this id : " + sellerId));
+
+            if(!seller.getIsActive()){
+                throw new RuntimeException("Seller is inactive");
+            }
+
+            spec = spec.and(hasSeller(sellerId));
+        }
+        if (minPrice != null){
+            spec = spec.and(hasMinPrice(minPrice));
+        }
+        if(maxPrice != null){
+            spec = spec.and(hasMaxPrice(maxPrice));
+        }
+
+        if(color != null && !color.isBlank()){
+            spec=spec.and(hasColor(color));
+        }
+
+        if (sizes!= null && !sizes.isBlank()){
+            spec = spec.and(hasSizes(sizes));
+        }
+
+        if (minRating!=null){
+            spec =spec.and(hasMinRating(minRating));
+        }
+
+        if(search!= null && !search.isBlank()){
+            spec = spec.and(matchSearch(search));
+        }
+        Pageable sortedPageable = applySorting(pageable, sort);
+
+        Page<Product> productPage = productRepository.findAll(spec, sortedPageable);
+
+        return productPage.map(this::mapToResponse);
+    }
+
+    private Pageable applySorting(Pageable pageable, String sort) {
+        if (sort == null || sort.isBlank()) {
+            return pageable;
+        }
+
+        Sort sorting = switch (sort.toLowerCase()) {
+            case "price_low" -> Sort.by(Sort.Direction.ASC, "sellingPrice");
+            case "price_high" -> Sort.by(Sort.Direction.DESC, "sellingPrice");
+            case "newest" -> Sort.by(Sort.Direction.DESC, "createdAt");
+            case "rating" -> Sort.by(Sort.Direction.DESC, "numRatings");
+            case "discount" -> Sort.by(Sort.Direction.DESC, "discountPercent");
+            default -> pageable.getSort();
+        };
+
+        return PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sorting
+        );
+    }
+
+
+    private ProductResponse mapToResponse(Product product) {
+        ProductResponse response = new ProductResponse();
+
+        response.setId(product.getId());
+        response.setTitle(product.getTitle());
+        response.setDescription(product.getDescription());
+        response.setMrpPrice(product.getMrpPrice());
+        response.setSellingPrice(product.getSellingPrice());
+        response.setDiscountPercent(product.getDiscountPercent());
+        response.setQuantity(product.getQuantity());
+        response.setColor(product.getColor());
+        response.setImages(product.getImages());
+        response.setSizes(product.getSizes());
+        response.setNumRatings(product.getNumRatings());
+        response.setCreatedAt(product.getCreatedAt());
+
+        // Category info
+        if (product.getCategory() != null) {
+            response.setCategoryId(product.getCategory().getId());
+            response.setCategoryName(product.getCategory().getName());
+            response.setCategorySlug(product.getCategory().getSlug());
+        }
+
+        // Seller info
+        if (product.getSeller() != null) {
+            response.setSellerId(product.getSeller().getId());
+            response.setSellerBusinessName(product.getSeller().getBusinessName());
+            response.setSellerRating(product.getSeller().getSellerRating());
+        }
+
+        return response;
+    }
+
+    private Specification<Product> matchSearch(String keyword) {
+        return (root, query, cb) -> {
+            String searchPattern = "%" + keyword.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("title")), searchPattern),
+                    cb.like(cb.lower(root.get("description")), searchPattern),
+                    cb.like(cb.lower(root.get("color")), searchPattern)
+            );
+        };
+    }
+
+    private Specification<Product> hasMinRating(Integer minRating) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.greaterThanOrEqualTo(root.get("numRatings"),minRating));
+    }
+
+    private Specification<Product> hasSizes(String sizes) {
+        return (root, query, cb) ->
+                cb.like(cb.lower(root.get("sizes")), "%" + sizes.toLowerCase() + "%");
+    }
+
+    private Specification<Product> hasColor(String color) {
+        return (root, query, cb) ->
+                cb.like(cb.lower(root.get("color")), "%" + color.toLowerCase() + "%");
+    }
+
+    private Specification<Product> hasMaxPrice(Integer maxPrice) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.lessThanOrEqualTo(root.get("sellingPrice"),maxPrice));
+    }
+
+    private Specification<Product> hasMinPrice(Integer minPrice) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.greaterThanOrEqualTo(root.get("sellingPrice"),minPrice));
+    }
+
+    private Specification<Product> hasSeller(Long sellerId) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("seller").get("id"),sellerId));
+    }
+
+    private Specification<Product> hasCategory(Long categoryId) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("category").get("id"),categoryId));
+    }
+
+    private Specification<Product> hasPositiveQuantity() {
+        return  ((root, query, criteriaBuilder) ->
+                criteriaBuilder.greaterThan(root.get("quantify"),0));
+    }
+}
