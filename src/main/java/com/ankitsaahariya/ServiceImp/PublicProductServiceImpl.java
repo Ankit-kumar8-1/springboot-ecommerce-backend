@@ -304,6 +304,6 @@ public class PublicProductServiceImpl implements PublicProductService {
 
     private Specification<Product> hasPositiveQuantity() {
         return  ((root, query, criteriaBuilder) ->
-                criteriaBuilder.greaterThan(root.get("quantify"),0));
+                criteriaBuilder.greaterThan(root.get("quantity"),0));
     }
 }

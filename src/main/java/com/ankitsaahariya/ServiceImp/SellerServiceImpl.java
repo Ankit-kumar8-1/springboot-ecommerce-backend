@@ -238,7 +238,7 @@ public class SellerServiceImpl implements SellerService {
     public MessageResponse updateSellerStatus(Long sellerId, SellerStatusUpdateRequest request) {
 
         SellerProfile profile =sellerProfileRepository.findByUserId(sellerId)
-                .orElseThrow(()-> new ResourceNotFoundException("Seller not found with this id"+sellerId));
+                .orElseThrow(()-> new ResourceNotFoundException("Seller not found with this id : "+sellerId));
 
         if(profile.getVerificationStatus() != SellerVerificationStatus.PENDING){
             throw new BadRequestException("Only pending applications can be updated. Current status: " +
