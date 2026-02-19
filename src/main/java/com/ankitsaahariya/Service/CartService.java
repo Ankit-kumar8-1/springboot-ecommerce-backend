@@ -9,4 +9,6 @@ public interface CartService {
     CartResponse addToCart(AddToCartRequest request);
 
     CartResponse updateCartItemQuantity(Long cartItemId, UpdateQuantityRequest request);
+
+    CartResponse removeCartItem(Long cartItemId);
 }

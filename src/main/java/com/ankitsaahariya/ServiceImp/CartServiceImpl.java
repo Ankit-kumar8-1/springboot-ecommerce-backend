@@ -118,6 +118,25 @@ public class CartServiceImpl implements CartService {
         return mapToResponse(cart);
     }
 
+    @Transactional
+    @Override
+    public CartResponse removeCartItem(Long cartItemId) {
+        UserEntity user = getCurrentUser();
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(()-> new ResourceNotFoundException("Item Not Found With this Id : "+ cartItemId));
+
+        if (!cartItem.getUserId().equals(user.getId())){
+            throw new BadRequestException("You can remove only your own cart items !");
+        }
+
+        Cart cart = cartItem.getCart();
+        cart.getCartItems().remove(cartItem);
+        cartItemRepository.delete(cartItem);
+
+        recalculateCart(cart);
+        return mapToResponse(cart);
+    }
 
     private CartResponse mapToResponse(Cart cart) {
         CartResponse response = new CartResponse();
