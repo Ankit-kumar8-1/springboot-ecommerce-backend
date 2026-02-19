@@ -6,6 +6,7 @@ import com.ankitsaahariya.Exception.UserNotFoundException;
 import com.ankitsaahariya.Service.CartService;
 import com.ankitsaahariya.dao.*;
 import com.ankitsaahariya.dto.request.AddToCartRequest;
+import com.ankitsaahariya.dto.request.UpdateQuantityRequest;
 import com.ankitsaahariya.dto.response.CartItemResponse;
 import com.ankitsaahariya.dto.response.CartResponse;
 import com.ankitsaahariya.entities.*;
@@ -90,6 +91,33 @@ public class CartServiceImpl implements CartService {
 
         return mapToResponse(cart);
     }
+
+    @Transactional
+    @Override
+    public CartResponse updateCartItemQuantity(Long cartItemId, UpdateQuantityRequest request) {
+        UserEntity user = getCurrentUser();
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(()-> new ResourceNotFoundException("Cart Item not found !"));
+
+        if (!cartItem.getUserId().equals(user.getId())){
+            throw new BadRequestException("You can only update your own cart items !");
+        }
+
+        Product product = cartItem.getProduct();
+        if (request.getQuantity() > product.getQuantity()){
+            throw  new BadRequestException("only " + product.getQuantity() + " Items available in stock");
+        }
+
+        cartItem.setQuantity(request.getQuantity());
+        cartItemRepository.save(cartItem);
+
+        Cart cart = cartItem.getCart();
+        recalculateCart(cart);
+
+        return mapToResponse(cart);
+    }
+
 
     private CartResponse mapToResponse(Cart cart) {
         CartResponse response = new CartResponse();
