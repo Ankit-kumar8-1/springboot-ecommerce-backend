@@ -138,6 +138,18 @@ public class CartServiceImpl implements CartService {
         return mapToResponse(cart);
     }
 
+    @Override
+    public CartResponse getCart() {
+        UserEntity user = getCurrentUser();
+
+        Optional<Cart> cartOpt = cartRepository.findByUserId(user.getId());
+        if(cartOpt.isEmpty()){
+            return new CartResponse();
+
+        }
+        return mapToResponse(cartOpt.get());
+    }
+
     private CartResponse mapToResponse(Cart cart) {
         CartResponse response = new CartResponse();
 

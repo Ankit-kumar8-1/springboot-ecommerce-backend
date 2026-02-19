@@ -37,4 +37,9 @@ public class CartController {
     public ResponseEntity<CartResponse> removeItem(@PathVariable Long cartItemId){
         return ResponseEntity.ok(cartService.removeCartItem(cartItemId));
     }
+
+    @GetMapping("/get")
+    public ResponseEntity<CartResponse> getCart(){
+        return ResponseEntity.ok(cartService.getCart());
+    }
 }
