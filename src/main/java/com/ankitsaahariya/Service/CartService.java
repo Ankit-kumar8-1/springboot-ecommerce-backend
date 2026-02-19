@@ -19,4 +19,6 @@ public interface CartService {
     MessageResponse clearCart();
 
     CartResponse applyCoupon(ApplyCouponRequest request);
+
+    CartResponse removeCoupon();
 }

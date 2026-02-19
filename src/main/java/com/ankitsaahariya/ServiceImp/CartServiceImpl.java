@@ -198,6 +198,20 @@ public class CartServiceImpl implements CartService {
         return mapToResponse(cart);
     }
 
+    @Transactional
+    @Override
+    public CartResponse removeCoupon() {
+        UserEntity user = getCurrentUser();
+
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(()-> new ResourceNotFoundException("Cart is empty"));
+
+        cart.setCouponCode(null);
+        recalculateCart(cart);
+
+        return mapToResponse(cart);
+    }
+
     private void validateCoupon(Coupon coupon, UserEntity user, Cart cart) {
         if (!coupon.isActive()) {
             throw new RuntimeException("This coupon is no longer active");

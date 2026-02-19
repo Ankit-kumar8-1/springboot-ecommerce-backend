@@ -56,4 +56,9 @@ public class CartController {
         return ResponseEntity.ok(cartService.applyCoupon(request));
     }
 
+    @DeleteMapping("/remove-coupon")
+    public ResponseEntity<CartResponse> removeCoupon(){
+        return ResponseEntity.ok(cartService.removeCoupon());
+    }
+
 }
