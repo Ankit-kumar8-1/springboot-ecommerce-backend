@@ -1,6 +1,7 @@
 package com.ankitsaahariya.Service;
 
 import com.ankitsaahariya.dto.request.AddToCartRequest;
+import com.ankitsaahariya.dto.request.ApplyCouponRequest;
 import com.ankitsaahariya.dto.request.UpdateQuantityRequest;
 import com.ankitsaahariya.dto.response.CartResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
@@ -16,4 +17,6 @@ public interface CartService {
     CartResponse getCart();
 
     MessageResponse clearCart();
+
+    CartResponse applyCoupon(ApplyCouponRequest request);
 }

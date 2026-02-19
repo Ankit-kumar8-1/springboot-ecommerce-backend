@@ -6,6 +6,7 @@ import com.ankitsaahariya.Exception.UserNotFoundException;
 import com.ankitsaahariya.Service.CartService;
 import com.ankitsaahariya.dao.*;
 import com.ankitsaahariya.dto.request.AddToCartRequest;
+import com.ankitsaahariya.dto.request.ApplyCouponRequest;
 import com.ankitsaahariya.dto.request.UpdateQuantityRequest;
 import com.ankitsaahariya.dto.response.CartItemResponse;
 import com.ankitsaahariya.dto.response.CartResponse;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -171,6 +173,55 @@ public class CartServiceImpl implements CartService {
         cartRepository.save(cart);
 
         return new MessageResponse("Cart cleared successfully !");
+    }
+
+    @Transactional
+    @Override
+    public CartResponse applyCoupon(ApplyCouponRequest request) {
+        UserEntity user = getCurrentUser();
+
+        Cart cart = cartRepository.findByUserId(user.getId()).
+                orElseThrow(()-> new ResourceNotFoundException("Cart is empty !"));
+
+        if (cart.getCartItems().isEmpty()){
+            throw new BadRequestException("Coupon Cannot not apply on empty cart");
+        }
+
+        Coupon coupon = couponRepository.findByCode(request.getCouponCode())
+                .orElseThrow(()-> new ResourceNotFoundException("Code is invalid !"));
+
+        validateCoupon(coupon,user,cart);
+
+        cart.setCouponCode(coupon.getCode());
+
+        recalculateCart(cart);
+        return mapToResponse(cart);
+    }
+
+    private void validateCoupon(Coupon coupon, UserEntity user, Cart cart) {
+        if (!coupon.isActive()) {
+            throw new RuntimeException("This coupon is no longer active");
+        }
+
+        // Check validity dates
+        LocalDate today = LocalDate.now();
+        if (today.isBefore(coupon.getValidityStartDate())) {
+            throw new RuntimeException("Coupon is not yet valid");
+        }
+        if (today.isAfter(coupon.getValidityEndDate())) {
+            throw new RuntimeException("Coupon has expired");
+        }
+
+        // Check minimum order value
+        if (cart.getTotalSellingPrice() < coupon.getMinimumOrderValue()) {
+            throw new RuntimeException(
+                    "Minimum order value of ₹" + coupon.getMinimumOrderValue() + " required");
+        }
+
+        // Check if user already used this coupon
+        if (coupon.getUsedByUsers().contains(user)) {
+            throw new RuntimeException("You have already used this coupon");
+        }
     }
 
     private CartResponse mapToResponse(Cart cart) {

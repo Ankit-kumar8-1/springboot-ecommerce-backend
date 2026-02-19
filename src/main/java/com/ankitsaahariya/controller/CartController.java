@@ -2,6 +2,7 @@ package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.CartService;
 import com.ankitsaahariya.dto.request.AddToCartRequest;
+import com.ankitsaahariya.dto.request.ApplyCouponRequest;
 import com.ankitsaahariya.dto.request.UpdateQuantityRequest;
 import com.ankitsaahariya.dto.response.CartResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
@@ -48,4 +49,11 @@ public class CartController {
     public ResponseEntity<MessageResponse> clearCart(){
         return  ResponseEntity.ok(cartService.clearCart());
     }
+
+    @PostMapping("/apply-coupon")
+    public ResponseEntity<CartResponse> applyCoupon(
+            @Valid @RequestBody ApplyCouponRequest request) {
+        return ResponseEntity.ok(cartService.applyCoupon(request));
+    }
+
 }
