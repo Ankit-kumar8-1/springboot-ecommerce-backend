@@ -9,6 +9,7 @@ import com.ankitsaahariya.dto.request.AddToCartRequest;
 import com.ankitsaahariya.dto.request.UpdateQuantityRequest;
 import com.ankitsaahariya.dto.response.CartItemResponse;
 import com.ankitsaahariya.dto.response.CartResponse;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.entities.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -148,6 +149,28 @@ public class CartServiceImpl implements CartService {
 
         }
         return mapToResponse(cartOpt.get());
+    }
+
+    @Transactional
+    @Override
+    public MessageResponse clearCart() {
+        UserEntity user = getCurrentUser();
+
+        Cart cart = cartRepository.findByUserId(user.getId())
+                .orElseThrow(()-> new ResourceNotFoundException("Cart Not found with this User :" +user.getFullName()));
+
+        cart.getCartItems().clear();
+        cartItemRepository.deleteByCartId(cart.getId());
+
+        cart.setTotalItem(0);
+        cart.setTotalSellingPrice(0);
+        cart.setTotalMprPrice(0);
+        cart.setDiscount(0);
+        cart.setCouponCode(null);
+
+        cartRepository.save(cart);
+
+        return new MessageResponse("Cart cleared successfully !");
     }
 
     private CartResponse mapToResponse(Cart cart) {

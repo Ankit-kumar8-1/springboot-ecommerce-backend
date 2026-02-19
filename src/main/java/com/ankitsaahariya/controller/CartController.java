@@ -4,6 +4,7 @@ import com.ankitsaahariya.Service.CartService;
 import com.ankitsaahariya.dto.request.AddToCartRequest;
 import com.ankitsaahariya.dto.request.UpdateQuantityRequest;
 import com.ankitsaahariya.dto.response.CartResponse;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class CartController {
         return  ResponseEntity.ok(cartService.updateCartItemQuantity(cartItemId,request));
     }
 
-    @DeleteMapping("/item/{cartItemId}")
+    @DeleteMapping("/item/remove/{cartItemId}")
     public ResponseEntity<CartResponse> removeItem(@PathVariable Long cartItemId){
         return ResponseEntity.ok(cartService.removeCartItem(cartItemId));
     }
@@ -41,5 +42,10 @@ public class CartController {
     @GetMapping("/get")
     public ResponseEntity<CartResponse> getCart(){
         return ResponseEntity.ok(cartService.getCart());
+    }
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<MessageResponse> clearCart(){
+        return  ResponseEntity.ok(cartService.clearCart());
     }
 }
