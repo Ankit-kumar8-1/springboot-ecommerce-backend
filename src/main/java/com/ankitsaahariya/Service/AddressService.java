@@ -4,6 +4,8 @@ import com.ankitsaahariya.dto.request.AddressRequest;
 import com.ankitsaahariya.dto.response.AddressResponse;
 import com.ankitsaahariya.dto.response.MessageResponse;
 
+import java.util.List;
+
 public interface AddressService {
 
     AddressResponse addAddress(AddressRequest request);
@@ -11,5 +13,7 @@ public interface AddressService {
     AddressResponse updateAddress(Long addressId,AddressRequest request);
 
     MessageResponse deleteAddress(Long addressId);
+
+    List<AddressResponse> getUserAddresses();
 
 }

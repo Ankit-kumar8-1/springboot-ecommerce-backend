@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -97,6 +98,16 @@ public class AddressServiceImpl implements AddressService {
         }
 
         return new MessageResponse("Address deleted Successfully !");
+    }
+
+    @Override
+    public List<AddressResponse> getUserAddresses() {
+        UserEntity user = getCurrentUser();
+        List<Address> addresses = addressRepository.findByUserId(user.getId());
+
+        return addresses.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     private AddressResponse mapToResponse(Address address) {
