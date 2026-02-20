@@ -16,4 +16,6 @@ public interface AddressService {
 
     List<AddressResponse> getUserAddresses();
 
+    AddressResponse setDefaultAddress(Long addressId);
+
 }

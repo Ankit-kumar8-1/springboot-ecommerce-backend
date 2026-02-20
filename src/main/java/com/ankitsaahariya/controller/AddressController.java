@@ -42,6 +42,10 @@ public class AddressController {
     @GetMapping("/get")
     public ResponseEntity<List<AddressResponse>> getUserAddresses(){
         return ResponseEntity.ok(addressService.getUserAddresses());
+    }
 
+    @PutMapping("/{id}/set-default")
+    public ResponseEntity<AddressResponse> setDefaultAddress(@PathVariable Long id){
+        return ResponseEntity.ok(addressService.setDefaultAddress(id));
     }
 }

@@ -110,6 +110,22 @@ public class AddressServiceImpl implements AddressService {
                 .toList();
     }
 
+    @Override
+    public AddressResponse setDefaultAddress(Long addressId) {
+        UserEntity user = getCurrentUser();
+
+        Address address  =  addressRepository.findByIdAndUserId(addressId,user.getId())
+                .orElseThrow(()-> new ResourceNotFoundException("Address not found or you don't have permission "));
+
+        addressRepository.removeDefaultForUser(user.getId());
+
+        // Set this address as default
+        address.setIsDefault(true);
+        Address updatedAddress = addressRepository.save(address);
+
+        return mapToResponse(updatedAddress);
+    }
+
     private AddressResponse mapToResponse(Address address) {
         AddressResponse response =
                 AddressResponse.builder()

@@ -34,6 +34,7 @@ public class Address {
     @Enumerated(EnumType.STRING)
     private AddressType addressType;  // HOME, WORK, OTHER
 
+
     private Boolean isDefault = false;  // Default address for delivery
 
     // User relationship - Critical for ownership
