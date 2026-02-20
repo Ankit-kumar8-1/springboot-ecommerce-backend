@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -124,6 +125,23 @@ public class AddressServiceImpl implements AddressService {
         Address updatedAddress = addressRepository.save(address);
 
         return mapToResponse(updatedAddress);
+    }
+
+    @Override
+    public AddressResponse getDefaultAddress() {
+        UserEntity user = getCurrentUser();
+        Optional<Address> defaultAddress = addressRepository.findByUserIdAndIsDefaultTrue(user.getId());
+
+        if (defaultAddress.isEmpty()) {
+            // If no default, return first address
+            List<Address> addresses = addressRepository.findByUserId(user.getId());
+            if (addresses.isEmpty()) {
+                throw new RuntimeException("No addresses found. Please add an address first.");
+            }
+            return mapToResponse(addresses.get(0));
+        }
+
+        return mapToResponse(defaultAddress.get());
     }
 
     private AddressResponse mapToResponse(Address address) {

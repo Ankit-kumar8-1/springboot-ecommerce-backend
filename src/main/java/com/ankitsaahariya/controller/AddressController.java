@@ -48,4 +48,9 @@ public class AddressController {
     public ResponseEntity<AddressResponse> setDefaultAddress(@PathVariable Long id){
         return ResponseEntity.ok(addressService.setDefaultAddress(id));
     }
+
+    @GetMapping("/default")
+    public ResponseEntity<AddressResponse> getDefaultAddress(){
+        return ResponseEntity.ok(addressService.getDefaultAddress());
+    }
 }

@@ -18,4 +18,6 @@ public interface AddressService {
 
     AddressResponse setDefaultAddress(Long addressId);
 
+    AddressResponse getDefaultAddress();
+
 }
