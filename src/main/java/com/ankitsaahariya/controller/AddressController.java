@@ -4,6 +4,7 @@ package com.ankitsaahariya.controller;
 import com.ankitsaahariya.Service.AddressService;
 import com.ankitsaahariya.dto.request.AddressRequest;
 import com.ankitsaahariya.dto.response.AddressResponse;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,5 +30,10 @@ public class AddressController {
             @Valid @RequestBody AddressRequest request
     ){
         return ResponseEntity.ok(addressService.updateAddress(id,request));
+    }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<MessageResponse> deleteAddress(@PathVariable Long id){
+        return ResponseEntity.ok(addressService.deleteAddress(id));
     }
 }

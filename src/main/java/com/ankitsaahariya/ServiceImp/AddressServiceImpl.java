@@ -1,5 +1,6 @@
 package com.ankitsaahariya.ServiceImp;
 
+import com.ankitsaahariya.Exception.BadRequestException;
 import com.ankitsaahariya.Exception.ResourceNotFoundException;
 import com.ankitsaahariya.Exception.UserNotFoundException;
 import com.ankitsaahariya.Service.AddressService;
@@ -7,13 +8,15 @@ import com.ankitsaahariya.dao.AddressRepository;
 import com.ankitsaahariya.dao.UserRepository;
 import com.ankitsaahariya.dto.request.AddressRequest;
 import com.ankitsaahariya.dto.response.AddressResponse;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.entities.Address;
 import com.ankitsaahariya.entities.UserEntity;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +71,32 @@ public class AddressServiceImpl implements AddressService {
 
         Address savedAddress = addressRepository.save(address);
         return mapToResponse(savedAddress);
+    }
+
+    @Transactional
+    @Override
+    public MessageResponse deleteAddress(Long addressId) {
+        UserEntity user = getCurrentUser();
+
+        Address address = addressRepository.findByIdAndUserId(addressId,user.getId())
+                .orElseThrow(()-> new ResourceNotFoundException("Address not found or you don't have permission"));
+
+        long addressCount = addressRepository.countByUserId(user.getId());
+        if (addressCount<= 1){
+            throw new BadRequestException("Cannot delete the only address. Please add another address first.");
+        }
+
+        boolean wasDefault = address.getIsDefault();
+        addressRepository.delete(address);
+
+        if (wasDefault){
+            List<Address> remainingAddresses = addressRepository.findByUserId(user.getId());
+            Address newDefault = remainingAddresses.get(0);
+            newDefault.setIsDefault(true);
+            addressRepository.save(newDefault);
+        }
+
+        return new MessageResponse("Address deleted Successfully !");
     }
 
     private AddressResponse mapToResponse(Address address) {
