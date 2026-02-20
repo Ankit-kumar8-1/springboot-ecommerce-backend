@@ -23,6 +23,5 @@ public class SignupRequest {
 
     @NotBlank
     @Pattern(regexp = "^[6-9][0-9]{9}$")
-    @Column(length = 10, unique = true, nullable = false)
     private String mobileNumber;
 }
