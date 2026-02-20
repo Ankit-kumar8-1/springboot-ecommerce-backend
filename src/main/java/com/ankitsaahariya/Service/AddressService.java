@@ -7,4 +7,6 @@ public interface AddressService {
 
     AddressResponse addAddress(AddressRequest request);
 
+    AddressResponse updateAddress(Long addressId,AddressRequest request);
+
 }

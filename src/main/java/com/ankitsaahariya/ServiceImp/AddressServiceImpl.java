@@ -1,5 +1,6 @@
 package com.ankitsaahariya.ServiceImp;
 
+import com.ankitsaahariya.Exception.ResourceNotFoundException;
 import com.ankitsaahariya.Exception.UserNotFoundException;
 import com.ankitsaahariya.Service.AddressService;
 import com.ankitsaahariya.dao.AddressRepository;
@@ -46,6 +47,27 @@ public class AddressServiceImpl implements AddressService {
             Address savedAddress = addressRepository.save(address);
 
             return mapToResponse(savedAddress);
+    }
+
+    @Transactional
+    @Override
+    public AddressResponse updateAddress(Long addressId, AddressRequest request) {
+        UserEntity user =  getCurrentUser();
+
+        Address address = addressRepository.findByIdAndUserId(addressId,user.getId())
+                .orElseThrow(()-> new ResourceNotFoundException("Address not found or you don't have permission"));
+
+        address.setName(request.getName());
+        address.setMobile(request.getMobile());
+        address.setAddress(request.getAddress());
+        address.setLocality(request.getLocality());
+        address.setCity(request.getCity());
+        address.setState(request.getState());
+        address.setPinCode(request.getPinCode());
+        address.setAddressType(request.getAddressType());
+
+        Address savedAddress = addressRepository.save(address);
+        return mapToResponse(savedAddress);
     }
 
     private AddressResponse mapToResponse(Address address) {
