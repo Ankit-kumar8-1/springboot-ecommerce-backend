@@ -20,16 +20,19 @@ public class PaymentOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private  Long amount;
+    private Long amount;
 
+    @Enumerated(EnumType.STRING)
     private PaymentOrderStatus status = PaymentOrderStatus.PENDING;
 
+    @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
-    private String paymentLinkId;
+
+    private String paymentLinkId;  // Razorpay order_id
 
     @ManyToOne
     private UserEntity user;
 
-    @OneToMany
+    @OneToMany(mappedBy = "paymentOrder")  // If using bidirectional
     private Set<Order> orders = new HashSet<>();
 }
