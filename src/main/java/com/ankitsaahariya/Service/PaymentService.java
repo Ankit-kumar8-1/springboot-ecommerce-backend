@@ -9,4 +9,6 @@ public interface PaymentService {
     JSONObject createPaymentOrder(Long addressId) throws Exception;
 
     PaymentResponse verifyPayment(PaymentVerificationRequest request) throws Exception;
+
+    void  handlePaymentFailure(String razorPayOrderId);
 }

@@ -20,7 +20,7 @@ public class Transaction {
     @ManyToOne
     private  UserEntity customer;
 
-    @OneToOne
+    @ManyToOne
     private SellerProfile seller;
 
     private LocalDateTime date = LocalDateTime.now();

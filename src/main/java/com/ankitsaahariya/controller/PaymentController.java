@@ -42,4 +42,14 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    @PostMapping("/failure")
+    public ResponseEntity<?> handlePaymentFailure(@RequestParam String orderId) {
+        try {
+            paymentService.handlePaymentFailure(orderId);
+            return ResponseEntity.ok(Map.of("message", "Payment failure recorded"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
