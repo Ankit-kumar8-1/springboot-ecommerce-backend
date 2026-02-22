@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+    <title>Razorpay Payment Test</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+<h1>Payment Test</h1>
+<button onclick="startPayment()">Pay ₹74,999</button>
+
+<script>
+    // Your JWT token
+    const token =
+      "eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiUk9MRV9DVVNUT01FUiIsInN1YiI6ImFkaXR5YUBtYWlsaW5hdG9yLmNvbSIsImlhdCI6MTc3MTcyNzMwNCwiZXhwIjoxNzc0MzE5MzA0fQ.X3mxjiV5ie05IvibmKOp2hoqS5nRiqzKOx1hSMDUBLtUIYNFIvuJDNmc4hiFLNBrVnytHgyiTDDc7lNNGUMM3w";
+
+    // Address ID
+    const addressId = 7;
+
+    async function startPayment() {
+      try {
+        console.log("Creating payment order...");
+
+        // Step 1: Create payment order
+        const response = await fetch(
+          `http://localhost:2222/api/v1.1/payments/create-order?addressId=${addressId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const orderData = await response.json();
+        console.log("Order created:", orderData);
+
+        // Step 2: Open Razorpay Checkout
+        openRazorpayCheckout(orderData);
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error creating payment order");
+      }
+    }
+
+    function openRazorpayCheckout(orderData) {
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        order_id: orderData.orderId,
+        name: "Your Store Name",
+        description: "Test Payment",
+        image: "https://your-logo-url.com/logo.png",
+
+        // Success Handler
+        handler: function (response) {
+          console.log("Payment Success:", response);
+          verifyPayment(response, orderData.orderId);
+        },
+
+        // Prefill customer details
+        prefill: {
+          name: "Test User",
+          email: "test@example.com",
+          contact: "9999999999",
+        },
+
+        // Modal settings
+        modal: {
+          ondismiss: function () {
+            console.log("Payment cancelled");
+            handlePaymentFailure(orderData.orderId);
+          },
+        },
+
+        // Theme
+        theme: {
+          color: "#3399cc",
+        },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    }
+
+    async function verifyPayment(razorpayResponse, orderId) {
+      try {
+        console.log("Verifying payment...");
+
+        const response = await fetch(
+          "http://localhost:2222/api/v1.1/payments/verify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              razorpayOrderId: orderId,
+              razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+              razorpaySignature: razorpayResponse.razorpay_signature,
+              addressId: addressId,
+            }),
+          },
+        );
+
+        const result = await response.json();
+        console.log("Verification result:", result);
+
+        if (response.ok) {
+          alert("Payment Successful! " + result.message);
+          console.log("Orders created:", result.orders);
+        } else {
+          alert("Payment verification failed: " + result.error);
+        }
+      } catch (error) {
+        console.error("Verification error:", error);
+        alert("Payment verification failed");
+      }
+    }
+
+    async function handlePaymentFailure(orderId) {
+      try {
+        await fetch(
+          `http://localhost:8080/payments/failure?orderId=${orderId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        console.log("Payment failure recorded");
+      } catch (error) {
+        console.error("Error recording failure:", error);
+      }
+    }
+</script>
+</body>
+</html>

@@ -13,28 +13,26 @@ public class CorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
-
         CorsConfiguration config = new CorsConfiguration();
-        // future frontend
-        config.setAllowedOrigins(
-                List.of("http://localhost:3000")
-        );
+
+        // ✅ TESTING KE LIYE - Allow all origins
+        config.setAllowedOrigins(List.of("*"));
+
+        // Ya specific origins:
+        // config.setAllowedOrigins(
+        //     List.of("http://localhost:3000", "file://")
+        // );
 
         config.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")
         );
 
-        config.setAllowedHeaders(
-                List.of("*")
-        );
+        config.setAllowedHeaders(List.of("*"));
 
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(false);  // ← false rakhna hai jab "*" use karo
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
 }
