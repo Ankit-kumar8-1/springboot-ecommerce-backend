@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // SELLER ORDERS PAGINATION
@@ -41,4 +43,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Long userId,
             Pageable pageable
     );
+
+    Optional<Order> findByIdAndUser_Id(Long orderId, Long userId);
+
 }
