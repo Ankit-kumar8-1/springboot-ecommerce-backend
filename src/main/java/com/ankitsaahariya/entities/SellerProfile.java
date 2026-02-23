@@ -108,8 +108,6 @@ public class SellerProfile {
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products = new ArrayList<>();
 
-    @OneToOne(mappedBy = "seller", cascade = CascadeType.ALL, orphanRemoval = true)
-    private SellerReport sellerReport;
 
     @OneToMany(mappedBy = "seller")
     private List<Transaction> transactions = new ArrayList<>();

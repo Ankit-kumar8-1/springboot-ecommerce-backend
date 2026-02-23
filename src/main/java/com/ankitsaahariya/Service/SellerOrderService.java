@@ -8,4 +8,6 @@ import org.springframework.data.domain.Pageable;
 public interface SellerOrderService {
 
     Page<OrderResponse> getSellerOrders(Pageable pageable, OrderStatus status);
+
+    OrderResponse getOrderById(Long orderId);
 }
