@@ -28,7 +28,9 @@ public class Order {
     @ManyToOne
     private UserEntity user;
 
-    private Long sellerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private SellerProfile seller;
 
     @OneToMany(mappedBy = "order",cascade = CascadeType.ALL,orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();

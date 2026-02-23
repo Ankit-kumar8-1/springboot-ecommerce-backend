@@ -3,7 +3,6 @@ package com.ankitsaahariya.ServiceImp;
 import com.ankitsaahariya.Exception.BadRequestException;
 import com.ankitsaahariya.Exception.ResourceNotFoundException;
 import com.ankitsaahariya.Service.PaymentService;
-import com.ankitsaahariya.Service.SellerReportService;
 import com.ankitsaahariya.dao.*;
 import com.ankitsaahariya.domain.OrderStatus;
 import com.ankitsaahariya.domain.PaymentMethod;
@@ -39,7 +38,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${razorpay.key.secret}")
     private String razorpayKeySecret;
 
-    private final SellerReportService sellerReportService;
     private final SellerProfileRepository sellerProfileRepository;
     private final RazorpayClient razorpayClient;
     private final PaymentOrderRepository paymentOrderRepository;
@@ -139,6 +137,11 @@ public class PaymentServiceImpl implements PaymentService {
             Long sellerId = entry.getKey();
             List<CartItem> sellerItems = entry.getValue();
 
+            // 👉 Fetch seller entity
+            SellerProfile seller = sellerProfileRepository
+                    .findById(sellerId)
+                    .orElseThrow(() -> new RuntimeException("Seller not found"));
+
             // Calculate totals
             int sellerTotalMrp = sellerItems.stream()
                     .mapToInt(item -> item.getMrpPrice() * item.getQuantity())
@@ -156,7 +159,7 @@ public class PaymentServiceImpl implements PaymentService {
             Order order = new Order();
             order.setOrderId(generateOrderId());
             order.setUser(user);
-            order.setSellerId(sellerId);
+            order.setSeller(seller);
             order.setShippingAddress(address);
             order.setOrderDate(LocalDateTime.now());
             order.setDeliverDate(LocalDateTime.now().plusDays(7));
@@ -178,7 +181,6 @@ public class PaymentServiceImpl implements PaymentService {
 
             Order savedOrder = orderRepository.save(order);
 
-            sellerReportService.updateOnOrderCreated(sellerId);
 
             // Create Order Items
             for (CartItem cartItem : sellerItems) {
@@ -278,7 +280,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         // Seller info
-        response.setSellerId(order.getSellerId());
+        response.setSellerId(order.getSeller().getId());
 
         // Address
         if (order.getShippingAddress() != null) {
