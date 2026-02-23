@@ -8,8 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface OrderRepository  extends JpaRepository<Order,Long> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
 
+    // SELLER ORDERS PAGINATION
     Page<Order> findBySeller_IdAndOrderStatusOrderByOrderDateDesc(
             Long sellerId,
             OrderStatus status,
@@ -19,5 +20,20 @@ public interface OrderRepository  extends JpaRepository<Order,Long> {
     Page<Order> findBySeller_IdOrderByOrderDateDesc(
             Long sellerId,
             Pageable pageable
+    );
+
+    // COUNT ORDERS BY STATUS
+    Long countBySeller_IdAndOrderStatus(Long sellerId, OrderStatus orderStatus);
+
+    // TOTAL REVENUE
+    @Query("""
+        SELECT SUM(o.totalSellingPrice)
+        FROM Order o
+        WHERE o.seller.id = :sellerId
+        AND o.orderStatus = :status
+    """)
+    Long getTotalRevenueBySellerAndStatus(
+            @Param("sellerId") Long sellerId,
+            @Param("status") OrderStatus status
     );
 }

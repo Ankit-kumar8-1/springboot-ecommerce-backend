@@ -47,7 +47,10 @@ public class Order {
 
     private Integer discount;
 
-    private OrderStatus orderStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus orderStatus = OrderStatus.PENDING;
 
     private int totalItem;
 

@@ -3,7 +3,9 @@ package com.ankitsaahariya.controller;
 
 import com.ankitsaahariya.Service.SellerOrderService;
 import com.ankitsaahariya.domain.OrderStatus;
+import com.ankitsaahariya.dto.request.UpdateOrderStatusRequest;
 import com.ankitsaahariya.dto.response.OrderResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/seller/orders")
@@ -41,5 +45,18 @@ public class SellerOrderController {
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return ResponseEntity.ok(sellerOrderService.getOrderById(id));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<OrderResponse> updateOrderStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateOrderStatusRequest request
+    ) {
+        return ResponseEntity.ok(sellerOrderService.updateOrderStatus(id, request));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<Map<String, Object>> getSellerOrderStats() {
+        return ResponseEntity.ok(sellerOrderService.getSellerOrderStats());
     }
 }

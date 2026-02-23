@@ -6,17 +6,22 @@ import com.ankitsaahariya.dao.OrderRepository;
 import com.ankitsaahariya.dao.SellerProfileRepository;
 import com.ankitsaahariya.dao.UserRepository;
 import com.ankitsaahariya.domain.OrderStatus;
+import com.ankitsaahariya.dto.request.UpdateOrderStatusRequest;
 import com.ankitsaahariya.dto.response.AddressResponse;
 import com.ankitsaahariya.dto.response.OrderItemResponse;
 import com.ankitsaahariya.dto.response.OrderResponse;
 import com.ankitsaahariya.entities.*;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +59,124 @@ public class SellerOrderServiceImpl implements SellerOrderService {
         return mapToDetailResponse(order);
     }
 
+    @Override
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, UpdateOrderStatusRequest request) {
+        SellerProfile seller = getCurrentSeller();
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Validate ownership
+        if (!order.getSeller().getId().equals(seller.getId())) {
+            throw new RuntimeException("You can only update your own orders");
+        }
+
+        // Validate status transition
+        validateStatusTransition(order.getOrderStatus(), request.getOrderStatus());
+
+        // Update status
+        order.setOrderStatus(request.getOrderStatus());
+        Order updatedOrder = orderRepository.save(order);
+
+//        for future
+        // emailService.sendOrderStatusUpdate(order.getUser().getEmail(), order);
+
+        return mapToResponse(updatedOrder);
+    }
+
+    @Override
+    public Map<String, Object> getSellerOrderStats() {
+        SellerProfile seller = getCurrentSeller();
+        Map<String, Object> stats = new HashMap<>();
+
+        // Total orders
+        Long pendingOrders = orderRepository.countBySeller_IdAndOrderStatus(
+                seller.getId(),
+                OrderStatus.PENDING
+        );
+        Long confirmedOrders = orderRepository.countBySeller_IdAndOrderStatus(
+                seller.getId(),
+                OrderStatus.CONFIRMED
+        );
+        Long shippedOrders = orderRepository.countBySeller_IdAndOrderStatus(
+                seller.getId(),
+                OrderStatus.SHIPPED
+        );
+        Long deliveredOrders = orderRepository.countBySeller_IdAndOrderStatus(
+                seller.getId(),
+                OrderStatus.DELIVERED
+        );
+        Long cancelledOrders = orderRepository.countBySeller_IdAndOrderStatus(
+                seller.getId(),
+                OrderStatus.CANCELLED
+        );
+
+        stats.put("pendingOrders", pendingOrders);
+        stats.put("confirmedOrders", confirmedOrders);
+        stats.put("shippedOrders", shippedOrders);
+        stats.put("deliveredOrders", deliveredOrders);
+        stats.put("cancelledOrders", cancelledOrders);
+        stats.put("totalOrders", pendingOrders + confirmedOrders + shippedOrders + deliveredOrders + cancelledOrders);
+
+        // Total revenue (only delivered orders)
+        Long totalRevenue = orderRepository.getTotalRevenueBySellerAndStatus(
+                seller.getId(),
+                OrderStatus.DELIVERED
+        );
+        stats.put("totalRevenue", totalRevenue != null ? totalRevenue : 0L);
+
+        return stats;
+    }
+
+    private void validateStatusTransition(OrderStatus currentStatus, OrderStatus newStatus) {
+        // Define valid transitions
+        switch (currentStatus) {
+            case PENDING:
+                if (newStatus != OrderStatus.CONFIRMED && newStatus != OrderStatus.CANCELLED) {
+                    throw new RuntimeException(
+                            "Can only move from PENDING to CONFIRMED or CANCELLED"
+                    );
+                }
+                break;
+
+            case CONFIRMED:
+                if (newStatus != OrderStatus.PACKED && newStatus != OrderStatus.CANCELLED) {
+                    throw new RuntimeException(
+                            "Can only move from CONFIRMED to PACKED or CANCELLED"
+                    );
+                }
+                break;
+
+            case PACKED:
+                if (newStatus != OrderStatus.SHIPPED) {
+                    throw new RuntimeException("Can only move from PACKED to SHIPPED");
+                }
+                break;
+
+            case SHIPPED:
+                if (newStatus != OrderStatus.OUT_FOR_DELIVERY) {
+                    throw new RuntimeException(
+                            "Can only move from SHIPPED to OUT_FOR_DELIVERY"
+                    );
+                }
+                break;
+
+            case OUT_FOR_DELIVERY:
+                if (newStatus != OrderStatus.DELIVERED) {
+                    throw new RuntimeException(
+                            "Can only move from OUT_FOR_DELIVERY to DELIVERED"
+                    );
+                }
+                break;
+
+            case DELIVERED:
+                throw new RuntimeException("Cannot change status of delivered order");
+
+            case CANCELLED:
+                throw new RuntimeException("Cannot change status of cancelled order");
+        }
+    }
 
 
     private OrderResponse mapToResponse(Order order) {
