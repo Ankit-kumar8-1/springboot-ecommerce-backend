@@ -2,6 +2,7 @@ package com.ankitsaahariya.controller;
 
 
 import com.ankitsaahariya.Service.OrderService;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,4 +46,12 @@ public class OrderController {
     public ResponseEntity<OrderResponse> getOrderByOrderId(@PathVariable String orderId) {
         return ResponseEntity.ok(orderService.getOrderByOrderId(orderId));
     }
+
+
+//    m es ko baad m karunga abi , muje do logic likhne padenge , refund or order palce
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<MessageResponse> cancelOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.cancelOrder(id));
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.ankitsaahariya.Service;
 
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.OrderResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,5 +12,7 @@ public interface OrderService {
     OrderResponse getOrderById(Long orderId);
 
     OrderResponse getOrderByOrderId(String orderId);
+
+    MessageResponse cancelOrder(Long orderId);
 }
 

@@ -6,10 +6,13 @@ import com.ankitsaahariya.dao.OrderItemRepository;
 import com.ankitsaahariya.dao.OrderRepository;
 import com.ankitsaahariya.dao.ProductRepository;
 import com.ankitsaahariya.dao.UserRepository;
+import com.ankitsaahariya.domain.OrderStatus;
 import com.ankitsaahariya.dto.response.AddressResponse;
+import com.ankitsaahariya.dto.response.MessageResponse;
 import com.ankitsaahariya.dto.response.OrderItemResponse;
 import com.ankitsaahariya.dto.response.OrderResponse;
 import com.ankitsaahariya.entities.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +64,42 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return mapToDetailResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse cancelOrder(Long orderId) {
+        UserEntity user = getCurrentUser();
+
+        Order order = orderRepository.findByIdAndUser_Id(orderId, user.getId())
+                .orElseThrow(() -> new RuntimeException("Order not found or you don't have permission"));
+
+        // Can only cancel if not shipped yet
+        if (order.getOrderStatus() == OrderStatus.SHIPPED ||
+                order.getOrderStatus() == OrderStatus.OUT_FOR_DELIVERY ||
+                order.getOrderStatus() == OrderStatus.DELIVERED) {
+            throw new RuntimeException(
+                    "Cannot cancel order. Order is already " + order.getOrderStatus()
+            );
+        }
+
+        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Order is already cancelled");
+        }
+
+        // Restore product stock
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
+        for (OrderItem item : orderItems) {
+            Product product = item.getProduct();
+            product.setQuantity(product.getQuantity() + item.getQuantity());
+            productRepository.save(product);
+        }
+
+        // Update order status
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
+
+        return new MessageResponse("Order cancelled successfully. Stock has been restored.");
     }
 
     private OrderResponse mapToDetailResponse(Order order) {
