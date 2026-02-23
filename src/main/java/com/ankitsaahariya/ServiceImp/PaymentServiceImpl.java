@@ -3,6 +3,7 @@ package com.ankitsaahariya.ServiceImp;
 import com.ankitsaahariya.Exception.BadRequestException;
 import com.ankitsaahariya.Exception.ResourceNotFoundException;
 import com.ankitsaahariya.Service.PaymentService;
+import com.ankitsaahariya.Service.SellerReportService;
 import com.ankitsaahariya.dao.*;
 import com.ankitsaahariya.domain.OrderStatus;
 import com.ankitsaahariya.domain.PaymentMethod;
@@ -38,6 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${razorpay.key.secret}")
     private String razorpayKeySecret;
 
+    private final SellerReportService sellerReportService;
     private final SellerProfileRepository sellerProfileRepository;
     private final RazorpayClient razorpayClient;
     private final PaymentOrderRepository paymentOrderRepository;
@@ -175,6 +177,8 @@ public class PaymentServiceImpl implements PaymentService {
             order.setPaymentDetails(paymentDetails);
 
             Order savedOrder = orderRepository.save(order);
+
+            sellerReportService.updateOnOrderCreated(sellerId);
 
             // Create Order Items
             for (CartItem cartItem : sellerItems) {
