@@ -9,4 +9,7 @@ public interface OrderService {
     Page<OrderResponse>  getUserOrders(Pageable pageable);
 
     OrderResponse getOrderById(Long orderId);
+
+    OrderResponse getOrderByOrderId(String orderId);
 }
+

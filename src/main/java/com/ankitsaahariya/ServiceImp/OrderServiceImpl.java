@@ -49,6 +49,19 @@ public class OrderServiceImpl implements OrderService {
         return mapToDetailResponse(order);
     }
 
+    @Override
+    public OrderResponse getOrderByOrderId(String orderId) {
+        Order order = orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        // Validate ownership
+        UserEntity user = getCurrentUser();
+        if (!order.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You don't have permission to view this order");
+        }
+
+        return mapToDetailResponse(order);
+    }
 
     private OrderResponse mapToDetailResponse(Order order) {
         OrderResponse response = mapToResponse(order);
